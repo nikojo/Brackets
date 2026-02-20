@@ -4,7 +4,6 @@ import BracketConfigPanel from './BracketConfigPanel'
 
 function App() {
 
-
   return (
     <>
       <div className="app-container">

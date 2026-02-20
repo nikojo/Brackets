@@ -1,32 +1,38 @@
 
 type Position = {
     column: number; // right to left, 0-indexed, nth column has 2^n slots
-    row: number; // top to bottom, 0-indexed
+    row: number; // bottom to top, 0-indexed
 }
 
 class InitialBracketStructure {
-    rounds: number;
+    rounds: number; // count from 1, number of rounds needed to determine a winner
     numParticipants: number;
+    numberOfPairsInFirstRound: number; // number of pairs that will be in the first (potentially incomplete) round
     constructor(numParticipants: number) {
         this.numParticipants = numParticipants;
         this.rounds = Math.ceil(Math.log2(numParticipants));
+        this.numberOfPairsInFirstRound = this.numParticipants - Math.pow(2, this.rounds - 1);
     }
 
     getPosition(participantIndex: number): Position {
         if (participantIndex < 0 || participantIndex >= this.numParticipants) {
             throw new Error("Participant index out of bounds");
         }
-        const overflow = this.numParticipants - Math.pow(2, this.rounds - 1);
-        if (participantIndex < overflow * 2) {
-            const column = this.rounds - 1;
-            const row = participantIndex - overflow;
+
+        if (participantIndex < this.numberOfPairsInFirstRound * 2) {
+            // Put the participant in the first round
+            const column = this.rounds;
+            const row = participantIndex;
             return { column, row };
         } else {
-            const column = this.rounds - 2;
-            const row = participantIndex - overflow * 2;
+            // Put the participant into the second round
+            const column = this.rounds - 1;
+            const row = participantIndex - this.numberOfPairsInFirstRound;
             return { column, row };
         }
     }
 }
+
+
 
 export { InitialBracketStructure, type Position };

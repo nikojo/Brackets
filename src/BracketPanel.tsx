@@ -25,11 +25,79 @@ const BracketPanel = observer(() => {
 
             // Drawing code
             context.clearRect(0, 0, canvas.width, canvas.height);
-            context.fillStyle = 'lightblue';
-            context.fillRect(50, 50, 10, 10);
+            context.strokeStyle = "blue";
+            context.lineWidth = 4;
+            context.strokeRect(5, 5, canvas.width-10, canvas.height-10);
+
             context.font = '12pt Arial';
             context.fillStyle = 'black';
-            context.fillText(bpstore.participants.length.toString(), 60, 60);
+
+            // Draw the bracket
+            const bracketStore = bpstore.bracketStore;
+            const titlebarHeight = 50
+            const leftMargin = 20;
+            for (let round = bracketStore.rounds; round >= 0; round--) {
+                const x = (bracketStore.rounds - round) * 150 + leftMargin;
+                const rows = Math.pow(2, round + 1);
+                const spacing = (canvas.height - titlebarHeight) / rows;
+                for (let pos = 0; pos < bracketStore.brackets[round].length; pos++) {
+                    const participant = bracketStore.brackets[round][pos];
+                    const y = titlebarHeight + Math.floor(((bracketStore.brackets[round].length - (pos + 1)) * 2 * spacing) + spacing);
+
+                    // draw lines
+                    if (participant !== null) {
+                        const topLine = pos % 2 === 1;
+                        context.strokeStyle = topLine ? "red" : "black";
+                        context.lineWidth = 2;
+                        context.beginPath();
+                        context.moveTo(x, y);
+                        context.lineTo(x + 150, y);
+                        if (round !== 0) {
+                            context.lineTo(x + 150, y + (topLine ? spacing : -spacing));
+                        }
+                        context.stroke();
+                    }
+
+                    // Draw participant name
+                    context.fillText(participant || "", x, y - 4);
+                }
+            }
+
+            // Draw third place bracket if applicable
+            if (bracketStore.participantCount > 3) {
+                let x = (bracketStore.rounds - 1) * 150 + leftMargin;
+                let y = titlebarHeight + 20;
+                // red participant
+                context.strokeStyle = "red";
+                context.lineWidth = 2;
+                context.beginPath();
+                context.moveTo(x, y);
+                context.lineTo(x + 150, y);
+                context.lineTo(x + 150, y + 20);
+                context.stroke();
+                context.fillText(bracketStore.thirdPlaceTop || "", x, y - 4);
+                // black participant
+                y = titlebarHeight + 60;
+                context.strokeStyle = "black";
+                context.lineWidth = 2;
+                context.beginPath();
+                context.moveTo(x, y);
+                context.lineTo(x + 150, y);
+                context.lineTo(x + 150, y - 20);
+                context.stroke();
+                context.fillText(bracketStore.thirdPlaceBottom || "", x, y - 4);
+                // Third place
+                x += 150;
+                y = titlebarHeight + 40;
+                context.strokeStyle = "black";
+                context.lineWidth = 2;
+                context.beginPath();
+                context.moveTo(x, y);
+                context.lineTo(x + 150, y);
+                context.stroke();
+                context.fillText(bracketStore.thirdPlace || "", x, y - 4);
+
+            }
         };
 
         // Initial render
@@ -41,7 +109,7 @@ const BracketPanel = observer(() => {
         return () => {
             window.removeEventListener('resize', resizeCanvas);
         };
-    }, [bpstore.participants.length]);
+    }, [bpstore.bracketStore, bpstore.participants.length]);
 
     return <canvas ref={canvasRef} className="bracket-panel" />;
 });
