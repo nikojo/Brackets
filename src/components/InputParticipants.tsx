@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useStore } from '../lib/BracketStore.ts';
 import useFocus from '../hooks/useFocus.ts';
+import FileUploadModal from '../FileUploadModal.tsx';
 
 export default function InputParticipants() {
 
@@ -26,6 +27,7 @@ export default function InputParticipants() {
         }
     }
 
+
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
             handleAddParticipant();
@@ -43,6 +45,10 @@ export default function InputParticipants() {
             <button onClick={handleAddParticipant}>
                 Add Participant
             </button>
+            <FileUploadModal onDataParsed={(data) => {
+                console.log(data.headers); // string[]
+                console.log(data.rows);    // Record<string, unknown>[]
+            }} />
         </div>
     )
 
