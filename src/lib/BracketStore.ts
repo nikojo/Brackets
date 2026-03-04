@@ -33,7 +33,6 @@ class BracketStore {
             const pos = init.getPosition(i);
             this.brackets[pos.column][pos.row] = bracketParticipants[i];
         }
-        console.log("bracket store after setting participants", this.brackets);
     }
 }
 
