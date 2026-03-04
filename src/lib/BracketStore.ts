@@ -5,7 +5,7 @@ import { InitialBracketStructure } from "./BracketGenerator";
 class BracketStore {
     depth: number = 0;
     rounds: number = 0;
-    brackets: (string | undefined)[][] = [[undefined]];
+    brackets: (string | undefined | null)[][] = [[undefined]];
     participantCount: number = 0;
 
     thirdPlaceTop : string | null = null;
@@ -47,8 +47,42 @@ class BracketParticipantsStore {
     }
 
     addParticipant(name: string) {
+        if (this.participants.includes(name)) throw new Error("Participant with name '" + name + "' already exists!");
         this.participants.push(name);
         this.regenerateBracketStore();
+    }
+
+    private mergeArraysAndFindDuplicates<T>(arr1: T[], arr2: T[]): { uniqueArray: T[], duplicates: T[] } {
+        // Combine both arrays
+        const mergedArray = [...arr1, ...arr2];
+
+        const uniqueElements = new Set<T>();
+        const duplicatesList: T[] = [];
+
+        for (const item of mergedArray) {
+            if (uniqueElements.has(item)) {
+                // If the element is already in the unique set, it's a duplicate
+                duplicatesList.push(item);
+            } else {
+                // Otherwise, add it to the unique set
+                uniqueElements.add(item);
+            }
+        }
+
+        // Convert the Set back to an array to get the final unique array
+        const uniqueArray = [...uniqueElements];
+
+        return {
+            uniqueArray,
+            duplicates: duplicatesList
+        };
+    }
+
+    addParticipants(names: string[]) : string[] {
+        const { uniqueArray, duplicates } = this.mergeArraysAndFindDuplicates(this.participants, names);
+        this.participants = uniqueArray;
+        this.regenerateBracketStore();
+        return duplicates;
     }
 
     removeParticipant(name: string) {
