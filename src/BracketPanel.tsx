@@ -33,20 +33,20 @@ const BracketPanel = observer(() => {
             context.fillStyle = 'black';
 
             // Draw the bracket
-            const bracketStore = bpstore.bracketStore;
+            const bracketStore = bpstore;
             const titlebarHeight = 50
             const leftMargin = 20;
-            for (let round = bracketStore.rounds; round >= 0; round--) {
+            for (let round = bracketStore.brackets.length - 1; round >= 0; round--) {
                 const x = (bracketStore.rounds - round) * 150 + leftMargin;
-                const rows = Math.pow(2, round + 1);
-                const spacing = (canvas.height - titlebarHeight) / rows;
-                for (let pos = 0; pos < bracketStore.brackets[round].length; pos++) {
+                const rows = bracketStore.brackets[round].length;
+                const spacing = (canvas.height - titlebarHeight) / (rows * 2);
+                for (let pos = 0; pos < rows; pos++) {
                     const participant = bracketStore.brackets[round][pos];
-                    const y = titlebarHeight + Math.floor(((bracketStore.brackets[round].length - (pos + 1)) * 2 * spacing) + spacing);
+                    const y = titlebarHeight + Math.floor(((rows - (pos + 1)) * 2 * spacing) + spacing);
 
                     // draw lines
                     if (participant !== null) {
-                        const topLine = pos % 2 === 1;
+                        const topLine = round !== 0 && pos % 2 === 1;
                         context.strokeStyle = topLine ? "red" : "black";
                         context.lineWidth = 2;
                         context.beginPath();
@@ -64,7 +64,7 @@ const BracketPanel = observer(() => {
             }
 
             // Draw third place bracket if applicable
-            if (bracketStore.participantCount > 3) {
+            if (!bracketStore.isKata && bracketStore.participants.length > 3 && bracketStore.hasThirddPlaceMatch) {
                 let x = (bracketStore.rounds - 1) * 150 + leftMargin;
                 let y = titlebarHeight + 20;
                 // red participant
@@ -109,7 +109,13 @@ const BracketPanel = observer(() => {
         return () => {
             window.removeEventListener('resize', resizeCanvas);
         };
-    }, [bpstore.bracketStore, bpstore.participants.length]);
+    }, 
+    [
+        bpstore, 
+        bpstore.participants.length, 
+        bpstore.hasThirddPlaceMatch, 
+        bpstore.isKata,
+    ]);
 
     return <canvas ref={canvasRef} className="bracket-panel" />;
 });

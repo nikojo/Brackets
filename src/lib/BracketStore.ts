@@ -6,44 +6,27 @@ class BracketStore {
     depth: number = 0;
     rounds: number = 0;
     brackets: (string | undefined | null)[][] = [[undefined]];
-    participantCount: number = 0;
+    participants: string[] = [];
+
+    hasThirddPlaceMatch: boolean = false;
+    isKata: boolean = true;
 
     thirdPlaceTop : string | null = null;
     thirdPlaceBottom : string | null = null;
     thirdPlace : string | null = null;  // winner of the third place match, if applicable
 
     constructor() {
-        //makeAutoObservable(this);
-    }
-
-    setParticipants(bracketParticipants: string[]) {
-        const init = new InitialBracketStructure(bracketParticipants.length);
-        this.rounds = init.rounds;
-        this.brackets = [];
-        this.participantCount = bracketParticipants.length;
-        // Create the bracket structure with the correct number of rounds and slots
-        for (let i = 0; i <= this.rounds; i++) {
-            // null in the first round means there is no participant, undefined in other rounds 
-            // means the match has not been played yet
-            const arr = new Array(Math.pow(2, i)).fill(i == this.rounds ? null : undefined);
-            this.brackets.push(arr);
-        }
-        //Now put in the participant names
-        for (let i = 0; i < bracketParticipants.length; i++) {
-            const pos = init.getPosition(i);
-            this.brackets[pos.column][pos.row] = bracketParticipants[i];
-        }
-    }
-}
-
-class BracketParticipantsStore {
-
-    participants: string[] = [];
-    bracketStore: BracketStore = new BracketStore();
-
-    constructor() {
         makeAutoObservable(this);
     }
+
+    setIsKata(isKata: boolean) {
+        this.isKata = isKata;
+    }
+
+    setHasThirdPlaceMatch(hasThirdPlaceMatch: boolean) {
+        this.hasThirddPlaceMatch = hasThirdPlaceMatch;
+    }
+
 
     addParticipant(name: string) {
         if (this.participants.includes(name)) throw new Error("Participant with name '" + name + "' already exists!");
@@ -101,17 +84,19 @@ class BracketParticipantsStore {
     }
 
     regenerateBracketStore() {
-        this.bracketStore.setParticipants(this.participants);
+        new InitialBracketStructure(this);
     }
 }
 
-const bpstore = new BracketParticipantsStore();
+
+
+const bpstore = new BracketStore();
 const ParticipantStore = createContext(bpstore);
 
 export const useStore = () => {
   return useContext(ParticipantStore);
 }
 
-export { BracketStore, BracketParticipantsStore, ParticipantStore };
+export { BracketStore, ParticipantStore };
 
 export default bpstore;

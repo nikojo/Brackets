@@ -12,10 +12,14 @@ html, body {
 }
 
 .app {
-  display: flex;
-  width: 100vw;
-  height: 100vh;
-  /* overflow: hidden; */
+  /* display: flex; */
+  width: 100%;
+  height: 100%;
+}
+
+.left-sidebar {
+  height: 100%;
+  background-color: #f0f0f0;
 }
 
 .bracket-config-panel {
@@ -24,13 +28,16 @@ html, body {
   padding: 5px;
 }
 
-.bracket-panel {
-  flex: 1;
+.main-content {
   background-color: #ffffff;
-  min-height: 0; /* Important for flex children */
-  min-width: 0;
   width: 100%;
   height: 100%;
+}
+
+.bracket-panel {
+  background-color: #ffffff;
+  width: 100%;
+  height: calc(100% - 6px);
 }
 
 .input-participants {

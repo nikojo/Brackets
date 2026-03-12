@@ -10,7 +10,7 @@ function App() {
       <Group className="app" orientation="horizontal">
 
         {/* Left Panel (Sidebar) */}
-        <Panel className="bracket-config-panel" defaultSize={255} minSize={5} maxSize={350}>
+        <Panel className="left-sidebar" defaultSize={255} minSize={5} maxSize={350}>
           <div>
             <BracketConfigPanel />
           </div>
@@ -20,7 +20,7 @@ function App() {
         <Separator style={{ width: '6px', background: '#ccc', cursor: 'col-resize' }} />
 
         {/* Main Content Panel */}
-        <Panel className="bracket-panel" minSize={50}>
+        <Panel className="main-content" minSize={50}>
             <BracketPanel />
         </Panel>
 
