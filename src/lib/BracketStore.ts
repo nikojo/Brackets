@@ -21,6 +21,7 @@ class BracketStore {
 
     setIsKata(isKata: boolean) {
         this.isKata = isKata;
+        this.regenerateBracketStore();
     }
 
     setHasThirdPlaceMatch(hasThirdPlaceMatch: boolean) {
