@@ -1,6 +1,8 @@
 import InputParticipants from './components/InputParticipants.tsx';
 import KataKumite from './components/katakumite.tsx';
+import { SaveOpenButtons } from './components/saveOpen.tsx';
 import ThirdPlace from './components/thirdPlace.tsx';
+import bpstore from './lib/BracketStore.ts';
 
 export default function BracketConfigPanel() {
 
@@ -10,6 +12,7 @@ export default function BracketConfigPanel() {
             <InputParticipants />
             <KataKumite />
             <ThirdPlace />
+            <SaveOpenButtons store={bpstore} />
         </div>
     )
 

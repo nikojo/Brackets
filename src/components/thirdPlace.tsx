@@ -1,7 +1,7 @@
-//import { useState } from 'react';
 import { useStore } from '../lib/BracketStore.ts';
+import { observer } from 'mobx-react-lite';
 
-export default function ThirdPlace() {
+const ThirdPlace = observer(() => {
 
     const bpstore = useStore();
 
@@ -11,8 +11,10 @@ export default function ThirdPlace() {
 
     return (
         <div>
-            <input type="checkbox" id="thirdPlace" defaultChecked={bpstore.hasThirddPlaceMatch} onChange={toggleHasThirdPlaceMatch}/>
+            <input type="checkbox" id="thirdPlace" checked={bpstore.hasThirddPlaceMatch} onChange={toggleHasThirdPlaceMatch}/>
             <label htmlFor="thirdPlace">Third Place Match?</label>            
         </div>
     )
-}
+});
+
+export default ThirdPlace;

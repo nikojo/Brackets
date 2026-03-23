@@ -1,7 +1,7 @@
-//import { useState } from 'react';
 import { useStore } from '../lib/BracketStore.ts';
+import { observer } from 'mobx-react-lite';
 
-export default function KataKumite() {
+const KataKumite = observer(() => {
 
     const bpstore = useStore();
 
@@ -11,8 +11,10 @@ export default function KataKumite() {
 
     return (
         <div>
-            <input type="checkbox" id="kataKumite" defaultChecked={bpstore.isKata} onChange={toggleKataKumite}/>
+            <input type="checkbox" id="kataKumite" checked={bpstore.isKata} onChange={toggleKataKumite}/>
             <label htmlFor="kataKumite">Kata?</label>            
         </div>
     )
-}
+});
+
+export default KataKumite;

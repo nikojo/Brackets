@@ -87,9 +87,39 @@ class BracketStore {
     regenerateBracketStore() {
         new InitialBracketStructure(this);
     }
+
+    serialize(): string {
+        const data = {
+            depth: this.depth,
+            rounds: this.rounds,
+            brackets: this.brackets,
+            participants: this.participants,
+            hasThirdPlaceMatch: this.hasThirddPlaceMatch,
+            isKata: this.isKata,
+            thirdPlaceTop: this.thirdPlaceTop,
+            thirdPlaceBottom: this.thirdPlaceBottom,
+            thirdPlace: this.thirdPlace,
+        };
+        return JSON.stringify(data);
+    }
+
+    static deserialize(json: string): BracketStore {
+        const data = JSON.parse(json);
+        const store = new BracketStore();
+
+        store.depth = data.depth;
+        store.rounds = data.rounds;
+        store.brackets = data.brackets;
+        store.participants = data.participants;
+        store.hasThirddPlaceMatch = data.hasThirdPlaceMatch;
+        store.isKata = data.isKata;
+        store.thirdPlaceTop = data.thirdPlaceTop ?? null;
+        store.thirdPlaceBottom = data.thirdPlaceBottom ?? null;
+        store.thirdPlace = data.thirdPlace ?? null;
+
+        return store;
+    }
 }
-
-
 
 const bpstore = new BracketStore();
 const ParticipantStore = createContext(bpstore);
