@@ -32,6 +32,9 @@ const BracketPanel = observer(() => {
             context.font = '12pt Arial';
             context.fillStyle = 'black';
 
+            // Add description at the top
+            context.fillText(bpstore.description + " - " + (bpstore.isKata ? "Kata" : "Kumite"), 20, 20);
+
             // Draw the bracket
             const bracketStore = bpstore;
             const titlebarHeight = 50
@@ -115,6 +118,8 @@ const BracketPanel = observer(() => {
         bpstore.participants.length, 
         bpstore.hasThirddPlaceMatch, 
         bpstore.isKata,
+        bpstore.isSeededMatch,
+        bpstore.description,
     ]);
 
     return <canvas ref={canvasRef} className="bracket-panel" />;

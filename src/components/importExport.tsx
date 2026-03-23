@@ -5,10 +5,10 @@ interface Props {
     store: BracketStore;
 }
 
-export function SaveOpenButtons({ store }: Props) {
+export function ImportExportButtons({ store }: Props) {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleSave = () => {
+    const handleExport = () => {
         const json = store.serialize();
         const blob = new Blob([json], { type: "application/json" });
         const url = URL.createObjectURL(blob);
@@ -19,7 +19,7 @@ export function SaveOpenButtons({ store }: Props) {
         URL.revokeObjectURL(url);
     };
 
-    const handleOpen = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
@@ -42,14 +42,14 @@ export function SaveOpenButtons({ store }: Props) {
 
     return (
         <div>
-            <button onClick={handleSave}>Save</button>
-            <button onClick={() => fileInputRef.current?.click()}>Open</button>
+            <button onClick={handleExport}>Export</button>
+            <button onClick={() => fileInputRef.current?.click()}>Import</button>
             <input
                 ref={fileInputRef}
                 type="file"
                 accept=".json"
                 style={{ display: "none" }}
-                onChange={handleOpen}
+                onChange={handleImport}
             />
         </div>
     );

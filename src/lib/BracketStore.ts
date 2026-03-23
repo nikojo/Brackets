@@ -9,8 +9,9 @@ class BracketStore {
     participants: string[] = [];
 
     hasThirddPlaceMatch: boolean = false;
+    isSeededMatch: boolean = false;
     isKata: boolean = true;
-
+    description: string = "default";
     thirdPlaceTop : string | null = null;
     thirdPlaceBottom : string | null = null;
     thirdPlace : string | null = null;  // winner of the third place match, if applicable
@@ -28,6 +29,15 @@ class BracketStore {
         this.hasThirddPlaceMatch = hasThirdPlaceMatch;
     }
 
+    setIsSeededMatch(isSeededMatch: boolean) {
+        this.isSeededMatch = isSeededMatch;
+        this.regenerateBracketStore();
+    }
+
+    setDescription(description: string) {
+        this.description = description;
+        this.regenerateBracketStore();
+    }
 
     addParticipant(name: string) {
         if (this.participants.includes(name)) throw new Error("Participant with name '" + name + "' already exists!");
@@ -95,7 +105,9 @@ class BracketStore {
             brackets: this.brackets,
             participants: this.participants,
             hasThirdPlaceMatch: this.hasThirddPlaceMatch,
+            isSeededMatch: this.isSeededMatch,
             isKata: this.isKata,
+            description: this.description,
             thirdPlaceTop: this.thirdPlaceTop,
             thirdPlaceBottom: this.thirdPlaceBottom,
             thirdPlace: this.thirdPlace,
@@ -112,7 +124,9 @@ class BracketStore {
         store.brackets = data.brackets;
         store.participants = data.participants;
         store.hasThirddPlaceMatch = data.hasThirdPlaceMatch;
+        store.isSeededMatch = data.isSeededMatch;
         store.isKata = data.isKata;
+        store.description = data.description;
         store.thirdPlaceTop = data.thirdPlaceTop ?? null;
         store.thirdPlaceBottom = data.thirdPlaceBottom ?? null;
         store.thirdPlace = data.thirdPlace ?? null;
