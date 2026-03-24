@@ -36,7 +36,7 @@ class InitialBracketStructure {
         //Now put in the participant names
         for (let i = 0; i < this.numParticipants; i++) {
             const pos = this.getPosition(i);
-            this.bracketStore.brackets[pos.column][pos.row] = this.bracketStore.participants[i];
+            this.bracketStore.setBracketItem(pos.column, pos.row, this.bracketStore.participants[i]);
         }        
     }
 

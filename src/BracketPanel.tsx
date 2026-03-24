@@ -6,6 +6,7 @@ const BracketPanel = observer(() => {
     const bpstore = useStore();
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [menuPos, setMenuPos] = useState<{x: number, y: number} | null>(null);
+    const [selectedParticipant, setSelectedParticipant] = useState<string | null>(null);
 
  
     // bounding boxes
@@ -53,15 +54,14 @@ const BracketPanel = observer(() => {
 
             // Draw the bracket
             const newBoundingBoxes: BoundingBox[] = [];
-            const bracketStore = bpstore;
             const titlebarHeight = 50
             const leftMargin = 20;
-            for (let round = bracketStore.brackets.length - 1; round >= 0; round--) {
-                const x = (bracketStore.rounds - round) * 150 + leftMargin;
-                const rows = bracketStore.brackets[round].length;
+            for (let round = bpstore.brackets.length - 1; round >= 0; round--) {
+                const x = (bpstore.rounds - round) * 150 + leftMargin;
+                const rows = bpstore.brackets[round].length;
                 const spacing = (canvas.height - titlebarHeight) / (rows * 2);
                 for (let pos = 0; pos < rows; pos++) {
-                    const participant = bracketStore.brackets[round][pos];
+                    const participant = bpstore.brackets[round][pos];
                     const y = titlebarHeight + Math.floor(((rows - (pos + 1)) * 2 * spacing) + spacing);
 
                     // draw lines
@@ -93,8 +93,8 @@ const BracketPanel = observer(() => {
             setBoundingBoxes(newBoundingBoxes);
 
             // Draw third place bracket if applicable
-            if (!bracketStore.isKata && bracketStore.participants.length > 3 && bracketStore.hasThirddPlaceMatch) {
-                let x = (bracketStore.rounds - 1) * 150 + leftMargin;
+            if (!bpstore.isKata && bpstore.participants.length > 3 && bpstore.hasThirddPlaceMatch) {
+                let x = (bpstore.rounds - 1) * 150 + leftMargin;
                 let y = titlebarHeight + 20;
                 // red participant
                 context.strokeStyle = "red";
@@ -104,7 +104,7 @@ const BracketPanel = observer(() => {
                 context.lineTo(x + 150, y);
                 context.lineTo(x + 150, y + 20);
                 context.stroke();
-                context.fillText(bracketStore.thirdPlaceTop || "", x, y - 4);
+                context.fillText(bpstore.thirdPlaceTop || "", x, y - 4);
                 // black participant
                 y = titlebarHeight + 60;
                 context.strokeStyle = "black";
@@ -114,7 +114,7 @@ const BracketPanel = observer(() => {
                 context.lineTo(x + 150, y);
                 context.lineTo(x + 150, y - 20);
                 context.stroke();
-                context.fillText(bracketStore.thirdPlaceBottom || "", x, y - 4);
+                context.fillText(bpstore.thirdPlaceBottom || "", x, y - 4);
                 // Third place
                 x += 150;
                 y = titlebarHeight + 40;
@@ -124,7 +124,7 @@ const BracketPanel = observer(() => {
                 context.moveTo(x, y);
                 context.lineTo(x + 150, y);
                 context.stroke();
-                context.fillText(bracketStore.thirdPlace || "", x, y - 4);
+                context.fillText(bpstore.thirdPlace || "", x, y - 4);
 
             }
         };
@@ -147,10 +147,10 @@ const BracketPanel = observer(() => {
             window.removeEventListener('beforeprint', handlePrint);
         };
     }, 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
         bpstore, 
         bpstore.participants.length, 
+        bpstore.brackets,
         bpstore.hasThirddPlaceMatch, 
         bpstore.isKata,
         bpstore.isSeededMatch,
@@ -160,11 +160,21 @@ const BracketPanel = observer(() => {
     const deleteParticipant = () => {
         const boundingBox = findBoundingBox(menuPos!.x, menuPos!.y); // get participant from bounding box
         if (boundingBox) {
-            // Implement delete logic here
-            console.log("Delete participant:", boundingBox.participant);
             bpstore.removeParticipant(boundingBox.participant);
         }
     }
+
+    const swapParticipants = () => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        canvas.style.cursor = 'move';
+        const boundingBox = findBoundingBox(menuPos!.x, menuPos!.y);
+        if (boundingBox) {
+            setSelectedParticipant(boundingBox.participant);
+        }
+    }
+
 
     // handle mouse clicks to detect participant selection
     const handleMouseClick = (event: MouseEvent<HTMLCanvasElement>) => {
@@ -179,8 +189,17 @@ const BracketPanel = observer(() => {
         const y = event.clientY - rect.top;
         const clickedBox = findBoundingBox(x, y)
         if (clickedBox) {
-            setMenuPos({ x, y });
+            if (selectedParticipant && selectedParticipant !== clickedBox.participant) {
+                bpstore.swapParticipants(selectedParticipant, clickedBox.participant);
+                setSelectedParticipant(null);
+                canvas.style.cursor = 'default';
+            }
+            else {  
+                setMenuPos({ x, y });
+            }
         } else {
+            setSelectedParticipant(null);
+            canvas.style.cursor = 'default';
             closeMenu();
         }
     }
@@ -200,7 +219,7 @@ const BracketPanel = observer(() => {
             }}
             >
             <button onClick={() => { deleteParticipant(); closeMenu(); }}>Delete</button>
-            <button onClick={() => { alert('Not implemented yet'); closeMenu(); }}>Move...</button>
+            <button onClick={() => { swapParticipants(); closeMenu(); }}>Swap...</button>
             </div>
         )}
     </div>;

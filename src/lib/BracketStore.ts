@@ -45,6 +45,16 @@ class BracketStore {
         this.regenerateBracketStore();
     }
 
+    setBracketItem(round: number, pos: number, participant: string ) {
+        if (round < 0 || round >= this.brackets.length) {
+            throw new Error("Round index out of bounds");
+        }
+        if (pos < 0 || pos >= this.brackets[round].length) {
+            throw new Error("Position index out of bounds");
+        }
+        this.brackets[round][pos] = participant;
+    }
+
     private mergeArraysAndFindDuplicates<T>(arr1: T[], arr2: T[]): { uniqueArray: T[], duplicates: T[] } {
         // Combine both arrays
         const mergedArray = [...arr1, ...arr2];
@@ -83,15 +93,19 @@ class BracketStore {
         this.regenerateBracketStore();
     }
 
+
     getParticipantIx(name: string) : number {
         return this.participants.indexOf(name);
     }
 
-       swapParticipants(nameA: string, nameB: string) {
+    swapParticipants(nameA: string, nameB: string) {
         const ixA = this.getParticipantIx(nameA);
         const ixB = this.getParticipantIx(nameB);
         if (ixA === -1 || ixB === -1) return;
-        [this.participants[ixA], this.participants[ixB]] = [this.participants[ixB], this.participants[ixA]];
+        const temp = this.participants[ixA];
+        this.participants[ixA] = this.participants[ixB];
+        this.participants[ixB] = temp;
+        this.regenerateBracketStore();
     }
 
     regenerateBracketStore() {
