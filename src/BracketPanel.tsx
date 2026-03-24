@@ -1,25 +1,34 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useState, useEffect, type MouseEvent } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useStore } from './lib/BracketStore.ts';
 
 const BracketPanel = observer(() => {
     const bpstore = useStore();
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [menuPos, setMenuPos] = useState<{x: number, y: number} | null>(null);
+
+ 
+    // bounding boxes
+    type BoundingBox = { x: number, y: number, width: number, height: number,
+        participant: string};
+
+    const [boundingBoxes, setBoundingBoxes] = useState<BoundingBox[]>([]);
+        
+    const findBoundingBox = (x: number, y: number) => {
+        return boundingBoxes.find(box => x >= box.x && x <= box.x + box.width && y >= box.y - box.height && y <= box.y);
+    }
+
+    const closeMenu = () => {
+        setMenuPos(null);
+    }
 
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
 
-        // bounding boxes
-        type BoundingBox = { x: number, y: number, width: number, height: number,
-            participant: string};
-        const boundingBoxes: BoundingBox[] = [];
-        
         const resizeCanvas = () => {
             const context = canvas.getContext('2d');
             if (!context) return;
-
-            boundingBoxes.length = 0; // Clear bounding boxes
 
             // Set canvas resolution to match display size
             const dpr = window.devicePixelRatio || 1;
@@ -43,6 +52,7 @@ const BracketPanel = observer(() => {
             context.fillText(bpstore.description + " - " + (bpstore.isKata ? "Kata" : "Kumite"), 20, 20);
 
             // Draw the bracket
+            const newBoundingBoxes: BoundingBox[] = [];
             const bracketStore = bpstore;
             const titlebarHeight = 50
             const leftMargin = 20;
@@ -76,10 +86,11 @@ const BracketPanel = observer(() => {
                         const metrics = context.measureText(text);
                         const width = Math.max(metrics.width, 10)+4;
                         const height = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
-                        boundingBoxes.push({ x: x-2, y, width, height, participant: text });
+                        newBoundingBoxes.push({ x: x-2, y, width, height, participant: text });
                     }
                 }
             }
+            setBoundingBoxes(newBoundingBoxes);
 
             // Draw third place bracket if applicable
             if (!bracketStore.isKata && bracketStore.participants.length > 3 && bracketStore.hasThirddPlaceMatch) {
@@ -124,17 +135,7 @@ const BracketPanel = observer(() => {
         }
         window.addEventListener('beforeprint', handlePrint);
 
-        // handle mouse clicks to detect participant selection
-        const handleMouseClick = (event: MouseEvent) => {
-            const x = event.offsetX;
-            const y = event.offsetY;
-            const clickedBox = boundingBoxes.find(box => x >= box.x && x <= box.x + box.width && y >= box.y - box.height && y <= box.y);
-            if (clickedBox) {
-                console.log("Selected participant:", clickedBox.participant);
-            }
-        }
-        window.addEventListener('click', handleMouseClick);
-        
+
         // Initial render
         resizeCanvas();
 
@@ -144,9 +145,9 @@ const BracketPanel = observer(() => {
         return () => {
             window.removeEventListener('resize', resizeCanvas);
             window.removeEventListener('beforeprint', handlePrint);
-            window.removeEventListener('click', handleMouseClick);
         };
     }, 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
         bpstore, 
         bpstore.participants.length, 
@@ -156,7 +157,53 @@ const BracketPanel = observer(() => {
         bpstore.description,
     ]);
 
-    return <canvas ref={canvasRef} className="bracket-panel" />;
+    const deleteParticipant = () => {
+        const boundingBox = findBoundingBox(menuPos!.x, menuPos!.y); // get participant from bounding box
+        if (boundingBox) {
+            // Implement delete logic here
+            console.log("Delete participant:", boundingBox.participant);
+            bpstore.removeParticipant(boundingBox.participant);
+        }
+    }
+
+    // handle mouse clicks to detect participant selection
+    const handleMouseClick = (event: MouseEvent<HTMLCanvasElement>) => {
+        const canvas = canvasRef.current;
+        if (!canvas) {
+            closeMenu();
+            return;
+        }
+
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        const clickedBox = findBoundingBox(x, y)
+        if (clickedBox) {
+            setMenuPos({ x, y });
+        } else {
+            closeMenu();
+        }
+    }
+        
+    return <div className="bracket-panel" style={{ position: 'relative' }}>
+        <canvas ref={canvasRef} className="bracket-panel" onClick={handleMouseClick} />
+        {menuPos && (
+            <div
+            style={{
+                position: 'absolute',
+                top: `${menuPos.y}px`,
+                left: `${menuPos.x}px`,
+                backgroundColor: 'white',
+                border: '1px solid #ccc',
+                zIndex: 1000,
+                padding: '5px',
+            }}
+            >
+            <button onClick={() => { deleteParticipant(); closeMenu(); }}>Delete</button>
+            <button onClick={() => { alert('Not implemented yet'); closeMenu(); }}>Move...</button>
+            </div>
+        )}
+    </div>;
 });
 
 export default BracketPanel;
