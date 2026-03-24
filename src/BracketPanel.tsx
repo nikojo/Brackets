@@ -10,9 +10,16 @@ const BracketPanel = observer(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
 
+        // bounding boxes
+        type BoundingBox = { x: number, y: number, width: number, height: number,
+            participant: string};
+        const boundingBoxes: BoundingBox[] = [];
+        
         const resizeCanvas = () => {
             const context = canvas.getContext('2d');
             if (!context) return;
+
+            boundingBoxes.length = 0; // Clear bounding boxes
 
             // Set canvas resolution to match display size
             const dpr = window.devicePixelRatio || 1;
@@ -61,8 +68,16 @@ const BracketPanel = observer(() => {
                         context.stroke();
                     }
 
+                    const text = participant || "";
                     // Draw participant name
-                    context.fillText(participant || "", x, y - 4);
+                    context.fillText(text, x, y - 4);
+                    // Save bounding box for interaction
+                    if (text != "") {
+                        const metrics = context.measureText(text);
+                        const width = Math.max(metrics.width, 10)+4;
+                        const height = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
+                        boundingBoxes.push({ x: x-2, y, width, height, participant: text });
+                    }
                 }
             }
 
@@ -108,6 +123,17 @@ const BracketPanel = observer(() => {
             resizeCanvas();
         }
         window.addEventListener('beforeprint', handlePrint);
+
+        // handle mouse clicks to detect participant selection
+        const handleMouseClick = (event: MouseEvent) => {
+            const x = event.offsetX;
+            const y = event.offsetY;
+            const clickedBox = boundingBoxes.find(box => x >= box.x && x <= box.x + box.width && y >= box.y - box.height && y <= box.y);
+            if (clickedBox) {
+                console.log("Selected participant:", clickedBox.participant);
+            }
+        }
+        window.addEventListener('click', handleMouseClick);
         
         // Initial render
         resizeCanvas();
@@ -118,6 +144,7 @@ const BracketPanel = observer(() => {
         return () => {
             window.removeEventListener('resize', resizeCanvas);
             window.removeEventListener('beforeprint', handlePrint);
+            window.removeEventListener('click', handleMouseClick);
         };
     }, 
     [
