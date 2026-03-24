@@ -103,6 +103,12 @@ const BracketPanel = observer(() => {
             }
         };
 
+        // redraw before printing
+        const handlePrint = () => {
+            resizeCanvas();
+        }
+        window.addEventListener('beforeprint', handlePrint);
+        
         // Initial render
         resizeCanvas();
 
@@ -111,6 +117,7 @@ const BracketPanel = observer(() => {
         
         return () => {
             window.removeEventListener('resize', resizeCanvas);
+            window.removeEventListener('beforeprint', handlePrint);
         };
     }, 
     [
