@@ -5,6 +5,7 @@ import ThirdPlace from './components/thirdPlace.tsx';
 import Seeded from './components/seeded.tsx';
 import Description from './components/description.tsx';
 import bpstore from './lib/BracketStore.ts';
+import Shuffle from './components/shufle.tsx';
 
 export default function BracketConfigPanel() {
 
@@ -16,6 +17,7 @@ export default function BracketConfigPanel() {
             <ThirdPlace />
             <Seeded />
             <Description />
+            <Shuffle />
             <ImportExportButtons store={bpstore} />
         </div>
     )

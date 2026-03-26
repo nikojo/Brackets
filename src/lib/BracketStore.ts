@@ -55,6 +55,14 @@ class BracketStore {
         this.brackets[round][pos] = participant;
     }
 
+    shuffleParticipants() {
+        for (let i = this.participants.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [this.participants[i], this.participants[j]] = [this.participants[j], this.participants[i]];
+        } 
+        this.regenerateBracketStore();
+    }
+
     private mergeArraysAndFindDuplicates<T>(arr1: T[], arr2: T[]): { uniqueArray: T[], duplicates: T[] } {
         // Combine both arrays
         const mergedArray = [...arr1, ...arr2];

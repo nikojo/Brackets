@@ -42,9 +42,13 @@ const BracketPanel = observer(() => {
 
             // Drawing code
             context.clearRect(0, 0, canvas.width, canvas.height);
+
+            /*
+            // For verifying the client area
             context.strokeStyle = "blue";
             context.lineWidth = 4;
             context.strokeRect(5, 5, canvas.width-10, canvas.height-10);
+            */
 
             context.font = '12pt Arial';
             context.fillStyle = 'black';
@@ -52,7 +56,7 @@ const BracketPanel = observer(() => {
             // Add description at the top
             context.fillText(bpstore.description + " - " + (bpstore.isKata ? "Kata" : "Kumite"), 20, 20);
 
-            // Draw the bracket
+            // Draw the bracket and record bounding boxes for interaction
             const newBoundingBoxes: BoundingBox[] = [];
             const titlebarHeight = 50
             const leftMargin = 20;
@@ -125,7 +129,17 @@ const BracketPanel = observer(() => {
                 context.lineTo(x + 150, y);
                 context.stroke();
                 context.fillText(bpstore.thirdPlace || "", x, y - 4);
+            }
 
+            // draw kata and scores if applicable
+            if (bpstore.isKata) {
+                let x = (bpstore.rounds + 1) * 150 + leftMargin;
+                const spacing = (canvas.height - titlebarHeight) / 8;
+                for (let i = 0; i < Math.min(bpstore.participants.length, 4); i++) {
+                    const y = titlebarHeight + Math.floor(((4 - (i + 1)) * 2 * spacing) + spacing);
+                    context.fillText("kata: ______________", x, y - (spacing / 4));
+                    context.fillText("score: _____________", x, y + (spacing / 4));
+                }
             }
         };
 
