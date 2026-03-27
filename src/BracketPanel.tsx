@@ -189,6 +189,22 @@ const BracketPanel = observer(() => {
         }
     }
 
+    const renameParticipant = () => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;   
+        const boundingBox = findBoundingBox(menuPos!.x, menuPos!.y);
+        if (boundingBox) {
+            const newName = prompt("Enter new name:", boundingBox.participant);
+            if (newName) {
+                try {
+                    bpstore.renameParticipant(boundingBox.participant, newName);
+                } catch (error) {
+                    alert(error instanceof Error ? error.message : String(error));
+                }
+            }
+        }
+    }
+
 
     // handle mouse clicks to detect participant selection
     const handleMouseClick = (event: MouseEvent<HTMLCanvasElement>) => {
@@ -217,7 +233,7 @@ const BracketPanel = observer(() => {
             closeMenu();
         }
     }
-        
+
     return <div className="bracket-panel" style={{ position: 'relative' }}>
         <canvas ref={canvasRef} className="bracket-panel" onClick={handleMouseClick} />
         {menuPos && (
@@ -233,6 +249,7 @@ const BracketPanel = observer(() => {
             }}
             >
             <button onClick={() => { deleteParticipant(); closeMenu(); }}>Delete</button>
+            <button onClick={() => { renameParticipant(); closeMenu(); }}>Rename</button>
             <button onClick={() => { swapParticipants(); closeMenu(); }}>Swap...</button>
             </div>
         )}

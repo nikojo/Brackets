@@ -45,6 +45,15 @@ class BracketStore {
         this.regenerateBracketStore();
     }
 
+    renameParticipant(oldName: string, newName: string) {
+        if (this.participants.includes(newName)) throw new Error("Participant with name '" + newName + "' already exists!");
+        const index = this.participants.indexOf(oldName);
+        if (index === -1) throw new Error("Participant with name '" + oldName + "' not found!");
+        this.participants[index] = newName;
+        this.regenerateBracketStore();
+    }
+
+
     setBracketItem(round: number, pos: number, participant: string ) {
         if (round < 0 || round >= this.brackets.length) {
             throw new Error("Round index out of bounds");
