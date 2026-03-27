@@ -133,10 +133,11 @@ const BracketPanel = observer(() => {
 
             // draw kata and scores if applicable
             if (bpstore.isKata) {
-                let x = (bpstore.rounds + 1) * 150 + leftMargin;
-                const spacing = (canvas.height - titlebarHeight) / 8;
-                for (let i = 0; i < Math.min(bpstore.participants.length, 4); i++) {
-                    const y = titlebarHeight + Math.floor(((4 - (i + 1)) * 2 * spacing) + spacing);
+                const x = (bpstore.rounds + 1) * 150 + leftMargin;
+                const kataScoringNum = bpstore.isTop4 ? 4 : 8;
+                const spacing = (canvas.height - titlebarHeight) / (kataScoringNum * 2);
+                for (let i = 0; i < Math.min(bpstore.participants.length, kataScoringNum); i++) {
+                    const y = titlebarHeight + Math.floor(((kataScoringNum - (i + 1)) * 2 * spacing) + spacing);
                     context.fillText("kata: ______________", x, y - (spacing / 4));
                     context.fillText("score: _____________", x, y + (spacing / 4));
                 }

@@ -7,9 +7,9 @@ type Position = {
 
 class InitialBracketStructure {
     numParticipants: number;
-    numberOfPairsInFirstRound: number; // number of pairs that will be in the first (potentially incomplete) round
+    numberOfPairsInFirstRound: number; // number of pairs that will be in the first round
     bracketStore: BracketStore;
-    seedPositions: number[] = [];
+    seedPositions: number[] = []; // index is participant id and value is position in the first round; 0-indexed from the bottom; length is always a power of 2
     
     constructor(bStore: BracketStore) {
         this.bracketStore = bStore;
@@ -17,11 +17,13 @@ class InitialBracketStructure {
         this.numberOfPairsInFirstRound = 0;
 
         this.bracketStore.brackets = [];
-        if (this.bracketStore.isKata && this.numParticipants <= 4) {
-            this.bracketStore.brackets.push(new Array(4).fill(null));
+        const kataScoringNum = this.bracketStore.isTop4 ? 4 : 8;
+        if (this.bracketStore.isKata && this.numParticipants <= kataScoringNum) {
+            // just final round for points
+            this.bracketStore.brackets.push(new Array(kataScoringNum).fill(null));
             this.bracketStore.rounds = 0;
         } else {
-            const kataAdjust = bStore.isKata ? 2 : 0; // Kata has 2 less rounds than kumite
+            const kataAdjust = bStore.isKata ? (this.bracketStore.isTop4 ? 2 : 3) : 0// Kata has 2 or 3 less rounds than kumite
             this.bracketStore.rounds = Math.ceil(Math.log2(this.numParticipants)) - kataAdjust;
             this.numberOfPairsInFirstRound = this.numParticipants - Math.pow(2, this.bracketStore.rounds - 1 + kataAdjust);
             
@@ -71,11 +73,23 @@ class InitialBracketStructure {
         if (this.bracketStore.isKata) {
             // for Kata put the higher seeds last
             const tmp: number[] = [];
-            const quarter = size / 4;
-            tmp.push(...positions.slice(0, quarter));
-            tmp.push(...positions.slice(quarter * 3));
-            tmp.push(...positions.slice(quarter * 2, quarter * 3));
-            tmp.push(...positions.slice(quarter, quarter * 2));
+            if (this.bracketStore.isTop4) {
+                const quarter = size / 4;
+                tmp.push(...positions.slice(0, quarter));
+                tmp.push(...positions.slice(quarter * 3));
+                tmp.push(...positions.slice(quarter * 2, quarter * 3));
+                tmp.push(...positions.slice(quarter * 1, quarter * 2));
+            } else {
+                const eighth = size / 8;
+                tmp.push(...positions.slice(0, eighth));
+                tmp.push(...positions.slice(eighth * 7));
+                tmp.push(...positions.slice(eighth * 4, eighth * 5));
+                tmp.push(...positions.slice(eighth * 3, eighth * 4));
+                tmp.push(...positions.slice(eighth * 2, eighth * 3));
+                tmp.push(...positions.slice(eighth * 5, eighth * 6));
+                tmp.push(...positions.slice(eighth * 6, eighth * 7));
+                tmp.push(...positions.slice(eighth * 1, eighth * 2));
+            }
             Object.assign(positions, tmp);
         }
 
@@ -92,8 +106,9 @@ class InitialBracketStructure {
             throw new Error("Participant index out of bounds");
         }
 
-        if (this.bracketStore.isKata && this.numParticipants <= 4) {
-            // For kata with less than 4 participants, we put them all in the first round and leave some slots empty
+        const kataScoringNum = this.bracketStore.isTop4 ? 4 : 8;
+        if (this.bracketStore.isKata && this.numParticipants <= kataScoringNum) {
+            // For kata with less than 4 or 8 participants, we put them all in the first round and leave some slots empty
             return { column: 0, row: participantIndex };
         } else if (this.bracketStore.isSeededMatch) {
             if ((this.bracketStore.participants.length - participantIndex) <= (this.numberOfPairsInFirstRound * 2)) {

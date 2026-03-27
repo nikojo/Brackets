@@ -11,7 +11,7 @@ const ThirdPlace = observer(() => {
 
     return (
         <div>
-            <input type="checkbox" id="thirdPlace" checked={bpstore.hasThirddPlaceMatch} onChange={toggleHasThirdPlaceMatch}/>
+            <input type="checkbox" id="thirdPlace" checked={bpstore.hasThirddPlaceMatch} onChange={toggleHasThirdPlaceMatch} disabled={bpstore.isKata}/>
             <label htmlFor="thirdPlace">Third Place Match?</label>            
         </div>
     )

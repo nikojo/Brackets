@@ -11,6 +11,7 @@ class BracketStore {
     hasThirddPlaceMatch: boolean = false;
     isSeededMatch: boolean = false;
     isKata: boolean = true;
+    isTop4: boolean = true; // only show top 4 in points mode, else top 8
     description: string = "default";
     thirdPlaceTop : string | null = null;
     thirdPlaceBottom : string | null = null;
@@ -22,6 +23,11 @@ class BracketStore {
 
     setIsKata(isKata: boolean) {
         this.isKata = isKata;
+        this.regenerateBracketStore();
+    }
+
+    setIsTop4(isTop4: boolean) {
+        this.isTop4 = isTop4;
         this.regenerateBracketStore();
     }
 
