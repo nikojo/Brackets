@@ -45,4 +45,28 @@ html, body {
   height: 150px;
 }
 
+.panel-resize-handle {
+  width: 6px;
+  background: #ccc;
+  cursor: col-resize;
+} 
+
+@media print {
+  /* Hide resize handles and unwanted panels */
+  .panel-resize-handle, 
+  .left-sidebar {
+    display: none !important;
+  }
+
+  /* Force main panel to take full width */
+  .main-content {
+    width: 100% !important;
+    flex: none !important;
+    display: block !important; }
+  
+  /* Ensure parent containers don't restrict size */
+  .app {
+    display: block !important;
+  }
+}
 

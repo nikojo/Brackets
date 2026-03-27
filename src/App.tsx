@@ -17,7 +17,7 @@ function App() {
         </Panel>
 
         {/* The resize handle/separator */}
-        <Separator style={{ width: '6px', background: '#ccc', cursor: 'col-resize' }} />
+        <Separator className="panel-resize-handle" />
 
         {/* Main Content Panel */}
         <Panel className="main-content" minSize={50}>
