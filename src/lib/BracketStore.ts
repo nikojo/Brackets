@@ -144,6 +144,7 @@ class BracketStore {
             hasThirdPlaceMatch: this.hasThirddPlaceMatch,
             isSeededMatch: this.isSeededMatch,
             isKata: this.isKata,
+            isTop4: this.isTop4,
             description: this.description,
             thirdPlaceTop: this.thirdPlaceTop,
             thirdPlaceBottom: this.thirdPlaceBottom,
@@ -163,6 +164,7 @@ class BracketStore {
         store.hasThirddPlaceMatch = data.hasThirdPlaceMatch;
         store.isSeededMatch = data.isSeededMatch;
         store.isKata = data.isKata;
+        store.isTop4 = data.isTop4;
         store.description = data.description;
         store.thirdPlaceTop = data.thirdPlaceTop ?? null;
         store.thirdPlaceBottom = data.thirdPlaceBottom ?? null;
