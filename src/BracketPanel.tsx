@@ -26,6 +26,7 @@ const BracketPanel = observer(() => {
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
+        let isPrinting = false;
 
         const resizeCanvas = () => {
             const context = canvas.getContext('2d');
@@ -34,9 +35,16 @@ const BracketPanel = observer(() => {
             // Set canvas resolution to match display size
             const dpr = window.devicePixelRatio || 1;
             const rect = canvas.getBoundingClientRect();
-            
-            canvas.width = rect.width * dpr;
-            canvas.height = rect.height * dpr;
+
+            if (isPrinting) {
+                const width = Math.max(bpstore.rounds * 150 + (bpstore.isKata ? 350 : 200), 900);
+                const height = Math.round(width * 11 / 8.5);
+                canvas.width = width * dpr;
+                canvas.height = height * dpr;
+            } else {
+                canvas.width = rect.width * dpr;
+                canvas.height = rect.height * dpr;
+            }
             
             context.scale(dpr, dpr);
 
@@ -146,9 +154,16 @@ const BracketPanel = observer(() => {
 
         // redraw before printing
         const handlePrint = () => {
+            isPrinting = true;
             resizeCanvas();
         }
         window.addEventListener('beforeprint', handlePrint);
+
+        const handleAfterPrint = () => {
+            isPrinting = false;
+            resizeCanvas();
+        }
+        window.addEventListener('afterprint', handleAfterPrint);
 
 
         // Initial render
@@ -160,6 +175,7 @@ const BracketPanel = observer(() => {
         return () => {
             window.removeEventListener('resize', resizeCanvas);
             window.removeEventListener('beforeprint', handlePrint);
+            window.removeEventListener('afterprint', handleAfterPrint);
         };
     }, 
     [
@@ -234,6 +250,7 @@ const BracketPanel = observer(() => {
             closeMenu();
         }
     }
+
 
     return <div className="bracket-panel" style={{ position: 'relative' }}>
         <canvas ref={canvasRef} className="bracket-panel" onClick={handleMouseClick} />
