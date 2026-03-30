@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import * as XLSX from "xlsx";
+//import * as XLSX from "xlsx";
 import Papa from "papaparse";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -35,6 +35,7 @@ async function parseCSV(file: File): Promise<ParsedData> {
 
 async function parseXLS(file: File): Promise<ParsedData> {
   const buffer = await file.arrayBuffer();
+  const XLSX = await import('xlsx');
   const workbook = XLSX.read(buffer, { type: "array" });
   const sheetName = workbook.SheetNames[0];
   const sheet = workbook.Sheets[sheetName];
