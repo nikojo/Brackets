@@ -12,11 +12,20 @@ export default function BracketConfigPanel() {
     return (
         <div className="bracket-config-panel">
             Bracket Config Panel
-            <InputParticipants />
-            <KataKumite />
-            <ThirdPlace />
-            <Seeded />
-            <Description />
+            <fieldset>
+                <legend>Bracket Description</legend>
+                <Description />
+            </fieldset>
+            <fieldset>
+                <legend>Participants</legend>
+                <InputParticipants />
+            </fieldset>
+            <fieldset>
+                <legend>Options</legend>
+                <KataKumite />
+                <ThirdPlace />
+                <Seeded />
+            </fieldset>
             <Shuffle />
             <ImportExportButtons store={bpstore} />
         </div>

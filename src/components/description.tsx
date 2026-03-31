@@ -11,7 +11,9 @@ const Description = observer(() => {
 
     return (
         <div>
-             <input type="text" 
+            <label htmlFor="description">Description:</label>
+            <br />
+            <input type="text" id="description"
             value={bpstore.description} 
             onChange={(e) => setDescription(e.target.value)}
              />       
