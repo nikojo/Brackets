@@ -1,5 +1,4 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-//import * as XLSX from "xlsx";
 import Papa from "papaparse";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
