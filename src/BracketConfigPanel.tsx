@@ -11,7 +11,6 @@ export default function BracketConfigPanel() {
 
     return (
         <div className="bracket-config-panel">
-            Bracket Config Panel
             <fieldset>
                 <legend>Bracket Description</legend>
                 <Description />
@@ -26,8 +25,14 @@ export default function BracketConfigPanel() {
                 <ThirdPlace />
                 <Seeded />
             </fieldset>
-            <Shuffle />
-            <ImportExportButtons store={bpstore} />
+            <fieldset>
+                <legend>Tools</legend>
+                <Shuffle />
+            </fieldset>
+            <fieldset>
+                <legend>Import/Export</legend>
+                <ImportExportButtons store={bpstore} />
+            </fieldset>
         </div>
     )
 

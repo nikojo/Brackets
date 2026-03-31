@@ -42,7 +42,6 @@ export function ImportExportButtons({ store }: Props) {
 
     return (
         <div>
-            <button onClick={handleExport}>Export</button>
             <button onClick={() => fileInputRef.current?.click()}>Import</button>
             <input
                 ref={fileInputRef}
@@ -51,6 +50,7 @@ export function ImportExportButtons({ store }: Props) {
                 style={{ display: "none" }}
                 onChange={handleImport}
             />
+            <button onClick={handleExport}>Export</button>
         </div>
     );
 }
