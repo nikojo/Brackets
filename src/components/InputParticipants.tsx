@@ -57,8 +57,10 @@ export default function InputParticipants() {
             ref={inputRef}
              />
             <button onClick={handleAddParticipant}>
-                Add Participant
+                Add
             </button>
+            <br />
+            <br />
             <FileUploadModal onDataParsed={handleAddParticipants} />
         </div>
     )

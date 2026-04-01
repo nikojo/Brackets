@@ -10,7 +10,7 @@ const Shuffle = observer(() => {
 
     return (
         <div>
-             <input type="button" value="Shuffle Participants" onClick={shuffleParticipants} />
+             <button onClick={shuffleParticipants} >Shuffle Participants</button>
         </div>
     )
 });
