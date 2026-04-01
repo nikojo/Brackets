@@ -33,7 +33,7 @@ const BracketPanel = observer(() => {
             if (!context) return;
 
             // Set canvas resolution to match display size
-            const dpr = 1; //window.devicePixelRatio || 1;
+            const dpr = window.devicePixelRatio || 1;
             const rect = canvas.getBoundingClientRect();
 
             if (isPrinting) {
@@ -45,6 +45,9 @@ const BracketPanel = observer(() => {
                 canvas.width = rect.width * dpr;
                 canvas.height = rect.height * dpr;
             }
+
+            canvas.style.width = `${rect.width}px`;
+            canvas.style.height = `${rect.height}px`;
             
             context.scale(dpr, dpr);
 
