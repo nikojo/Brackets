@@ -48,7 +48,7 @@ const KataKumite = observer(() => {
                     </label>
                 ))}
                 <br />
-                <input type="checkbox" id="thirdPlace" checked={bpstore.hasThirddPlaceMatch} onChange={toggleHasThirdPlaceMatch} disabled={bpstore.isKata} />
+                <input type="checkbox" id="thirdPlace" checked={bpstore.isKata ? false : bpstore.hasThirddPlaceMatch} onChange={toggleHasThirdPlaceMatch} disabled={bpstore.isKata} />
                 <label htmlFor="thirdPlace">Third Place Match?</label>     
             </div>
         </div>
