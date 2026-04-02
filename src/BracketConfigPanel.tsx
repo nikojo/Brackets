@@ -5,6 +5,7 @@ import Seeded from './components/seeded.tsx';
 import Description from './components/description.tsx';
 import bpstore from './lib/BracketStore.ts';
 import Shuffle from './components/shuffle.tsx';
+import Help from './components/help.tsx';
 
 export default function BracketConfigPanel() {
 
@@ -30,6 +31,10 @@ export default function BracketConfigPanel() {
             <fieldset>
                 <legend>Import/Export</legend>
                 <ImportExportButtons store={bpstore} />
+            </fieldset>
+            <fieldset>
+                <legend>Help</legend>
+                <Help />
             </fieldset>
         </div>
     )
