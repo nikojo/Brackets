@@ -61,7 +61,7 @@ const BracketPanel = observer(() => {
             context.strokeRect(5, 5, canvas.width-10, canvas.height-10);
             */
 
-            context.font = '12pt Arial';
+            context.font = bpstore.participants.length > 32 ? '10pt Arial' : '12pt Arial';
             context.fillStyle = 'black';
 
             // Add description at the top
