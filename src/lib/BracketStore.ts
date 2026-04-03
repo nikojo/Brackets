@@ -3,6 +3,7 @@ import { createContext, useContext } from 'react'
 import { InitialBracketStructure } from "./BracketGenerator";
 
 class BracketStore {
+    version: number = 1; // Increment this if the structure of the store changes in a non-backwards-compatible way
     depth: number = 0;
     rounds: number = 0;
     brackets: (string | undefined | null)[][] = [[undefined]];
@@ -137,6 +138,7 @@ class BracketStore {
 
     serialize(): string {
         const data = {
+            version: this.version,
             depth: this.depth,
             rounds: this.rounds,
             brackets: this.brackets,
@@ -157,18 +159,22 @@ class BracketStore {
         const data = JSON.parse(json);
         const store = new BracketStore();
 
-        store.depth = data.depth;
-        store.rounds = data.rounds;
-        store.brackets = data.brackets;
-        store.participants = data.participants;
-        store.hasThirddPlaceMatch = data.hasThirdPlaceMatch;
-        store.isSeededMatch = data.isSeededMatch;
-        store.isKata = data.isKata;
-        store.isTop4 = data.isTop4;
-        store.description = data.description;
-        store.thirdPlaceTop = data.thirdPlaceTop ?? null;
-        store.thirdPlaceBottom = data.thirdPlaceBottom ?? null;
-        store.thirdPlace = data.thirdPlace ?? null;
+        if (!data.version || data.version == 1) {
+            store.depth = data.depth;
+            store.rounds = data.rounds;
+            store.brackets = data.brackets;
+            store.participants = data.participants;
+            store.hasThirddPlaceMatch = data.hasThirdPlaceMatch;
+            store.isSeededMatch = data.isSeededMatch;
+            store.isKata = data.isKata;
+            store.isTop4 = data.isTop4;
+            store.description = data.description;
+            store.thirdPlaceTop = data.thirdPlaceTop ?? null;
+            store.thirdPlaceBottom = data.thirdPlaceBottom ?? null;
+            store.thirdPlace = data.thirdPlace ?? null;
+        } else {
+            throw new Error("Unsupported version: " + data.version);
+        }
 
         return store;
     }
