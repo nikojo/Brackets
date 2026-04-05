@@ -175,6 +175,20 @@ const BracketPanel = observer(() => {
         // Listen for window resize
         window.addEventListener('resize', resizeCanvas);
 
+        // Use ResizeObserver to handle changes in canvas size due to CSS changes or parent container resizing
+        const resizeObserver = new ResizeObserver((entries) => {
+            for (const entry of entries) {
+                const { width, height } = entry.contentRect;
+
+                // Update internal canvas resolution to match display size
+                canvas.width = width;
+                canvas.height = height;
+
+                resizeCanvas();
+            }
+        });
+        resizeObserver.observe(canvas);
+
         // prevent user from losing their work by accidentally closing or refreshing the page
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
             if (bpstore.hasChanges) {
