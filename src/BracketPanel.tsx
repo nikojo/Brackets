@@ -172,8 +172,6 @@ const BracketPanel = observer(() => {
         // Initial render
         resizeCanvas();
 
-        // Listen for window resize
-        window.addEventListener('resize', resizeCanvas);
 
         // Use ResizeObserver to handle changes in canvas size due to CSS changes or parent container resizing
         const resizeObserver = new ResizeObserver((entries) => {
@@ -198,7 +196,6 @@ const BracketPanel = observer(() => {
         window.addEventListener('beforeunload', handleBeforeUnload);
         
         return () => {
-            window.removeEventListener('resize', resizeCanvas);
             window.removeEventListener('beforeprint', handlePrint);
             window.removeEventListener('afterprint', handleAfterPrint);
             window.removeEventListener('beforeunload', handleBeforeUnload);
