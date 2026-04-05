@@ -38,7 +38,7 @@ const BracketPanel = observer(() => {
 
             if (isPrinting) {
                 const width = Math.max(bpstore.rounds() * 150 + (bpstore.isKata ? 350 : 200), 900);
-                const height = Math.round(width * 11 / 8.5);
+                const height = Math.floor(width * 11 / 8.5)-10;
                 canvas.width = width * dpr;
                 canvas.height = height * dpr;
             } else {
