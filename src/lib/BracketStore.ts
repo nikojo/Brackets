@@ -3,9 +3,8 @@ import { createContext, useContext } from 'react'
 import { InitialBracketStructure } from "./BracketGenerator";
 
 class BracketStore {
-    version: number = 1; // Increment this if the structure of the store changes in a non-backwards-compatible way
-    depth: number = 0;
-    rounds: number = 0;
+    #version: number = 1; // Increment this if the structure of the store changes in a non-backwards-compatible way
+
     brackets: (string | undefined | null)[][] = [[undefined]];
     participants: string[] = [];
 
@@ -18,8 +17,14 @@ class BracketStore {
     thirdPlaceBottom : string | null = null;
     thirdPlace : string | null = null;  // winner of the third place match, if applicable
 
+    hasChanges: boolean = false; // flag to track if there are unsaved changes; do not serialize this field, it is only relevant for the current session
+
     constructor() {
         makeAutoObservable(this);
+    }
+
+    rounds() : number {
+        return this.brackets.length - 1;
     }
 
     setIsKata(isKata: boolean) {
@@ -134,13 +139,12 @@ class BracketStore {
 
     regenerateBracketStore() {
         new InitialBracketStructure(this);
+        this.hasChanges = true;
     }
 
     serialize(): string {
         const data = {
-            version: this.version,
-            depth: this.depth,
-            rounds: this.rounds,
+            version: this.#version,
             brackets: this.brackets,
             participants: this.participants,
             hasThirdPlaceMatch: this.hasThirddPlaceMatch,
@@ -160,8 +164,6 @@ class BracketStore {
         const store = new BracketStore();
 
         if (!data.version || data.version == 1) {
-            store.depth = data.depth;
-            store.rounds = data.rounds;
             store.brackets = data.brackets;
             store.participants = data.participants;
             store.hasThirddPlaceMatch = data.hasThirdPlaceMatch;

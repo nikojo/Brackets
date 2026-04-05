@@ -21,17 +21,16 @@ class InitialBracketStructure {
         if (this.bracketStore.isKata && this.numParticipants <= kataScoringNum) {
             // just final round for points
             this.bracketStore.brackets.push(new Array(kataScoringNum).fill(null));
-            this.bracketStore.rounds = 0;
         } else {
             const kataAdjust = bStore.isKata ? (this.bracketStore.isTop4 ? 2 : 3) : 0// Kata has 2 or 3 less rounds than kumite
-            this.bracketStore.rounds = Math.ceil(Math.log2(this.numParticipants)) - kataAdjust;
-            this.numberOfPairsInFirstRound = this.numParticipants - Math.pow(2, this.bracketStore.rounds - 1 + kataAdjust);
+            const rounds = Math.ceil(Math.log2(this.numParticipants)) - kataAdjust;
+            this.numberOfPairsInFirstRound = this.numParticipants - Math.pow(2, rounds - 1 + kataAdjust);
             
             // Create the bracket structure with the correct number of rounds and slots
-            for (let i = 0; i <= this.bracketStore.rounds; i++) {
+            for (let i = 0; i <= rounds; i++) {
                 // null in the first round means there is no participant, undefined in other rounds 
                 // means the match has not been played yet
-                const arr = new Array(Math.pow(2, i + kataAdjust)).fill(i == this.bracketStore.rounds ? null : undefined);
+                const arr = new Array(Math.pow(2, i + kataAdjust)).fill(i == rounds ? null : undefined);
                 this.bracketStore.brackets.push(arr);
             }
         }
@@ -54,7 +53,7 @@ class InitialBracketStructure {
 
         // First create a list where the participant index is the position in the first round
         const positions: number[] = [];
-        const size = this.bracketStore.brackets[this.bracketStore.rounds].length;
+        const size = this.bracketStore.brackets[this.bracketStore.rounds()].length;
         if (size === 0) return;
 
         for (let i = 1; i < size / 4; i++) {
@@ -113,24 +112,24 @@ class InitialBracketStructure {
         } else if (this.bracketStore.isSeededMatch) {
             if ((this.bracketStore.participants.length - participantIndex) <= (this.numberOfPairsInFirstRound * 2)) {
                 // Put the participant in the first round
-                const column = this.bracketStore.rounds;
+                const column = this.bracketStore.rounds();
                 const row = this.seedPositions[participantIndex];
                 return { column, row };
             } else {
                 // Put the participant into the second round
-                const column = this.bracketStore.rounds - 1;
+                const column = this.bracketStore.rounds() - 1;
                 const row = Math.floor(this.seedPositions[participantIndex] / 2);
                 return { column, row };
             }        
         } else {
             if (participantIndex < this.numberOfPairsInFirstRound * 2) {
                 // Put the participant in the first round
-                const column = this.bracketStore.rounds;
+                const column = this.bracketStore.rounds();
                 const row = participantIndex;
                 return { column, row };
             } else {
                 // Put the participant into the second round
-                const column = this.bracketStore.rounds - 1;
+                const column = this.bracketStore.rounds() - 1;
                 const row = participantIndex - this.numberOfPairsInFirstRound;
                 return { column, row };
             }

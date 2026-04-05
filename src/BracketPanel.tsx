@@ -37,7 +37,7 @@ const BracketPanel = observer(() => {
             const rect = canvas.getBoundingClientRect();
 
             if (isPrinting) {
-                const width = Math.max(bpstore.rounds * 150 + (bpstore.isKata ? 350 : 200), 900);
+                const width = Math.max(bpstore.rounds() * 150 + (bpstore.isKata ? 350 : 200), 900);
                 const height = Math.round(width * 11 / 8.5);
                 canvas.width = width * dpr;
                 canvas.height = height * dpr;
@@ -72,7 +72,7 @@ const BracketPanel = observer(() => {
             const titlebarHeight = 50
             const leftMargin = 20;
             for (let round = bpstore.brackets.length - 1; round >= 0; round--) {
-                const x = (bpstore.rounds - round) * 150 + leftMargin;
+                const x = (bpstore.rounds() - round) * 150 + leftMargin;
                 const rows = bpstore.brackets[round].length;
                 const spacing = (canvas.height - titlebarHeight) / (rows * 2);
                 for (let pos = 0; pos < rows; pos++) {
@@ -109,7 +109,7 @@ const BracketPanel = observer(() => {
 
             // Draw third place bracket if applicable
             if (!bpstore.isKata && bpstore.participants.length > 3 && bpstore.hasThirddPlaceMatch) {
-                let x = (bpstore.rounds - 1) * 150 + leftMargin;
+                let x = (bpstore.rounds() - 1) * 150 + leftMargin;
                 let y = titlebarHeight + 20;
                 // red participant
                 context.strokeStyle = "red";
@@ -144,7 +144,7 @@ const BracketPanel = observer(() => {
 
             // draw kata and scores if applicable
             if (bpstore.isKata) {
-                const x = (bpstore.rounds + 1) * 150 + leftMargin;
+                const x = (bpstore.rounds() + 1) * 150 + leftMargin;
                 const kataScoringNum = bpstore.isTop4 ? 4 : 8;
                 const spacing = (canvas.height - titlebarHeight) / (kataScoringNum * 2);
                 for (let i = 0; i < Math.min(bpstore.participants.length, kataScoringNum); i++) {
@@ -174,11 +174,20 @@ const BracketPanel = observer(() => {
 
         // Listen for window resize
         window.addEventListener('resize', resizeCanvas);
+
+        // prevent user from losing their work by accidentally closing or refreshing the page
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (bpstore.hasChanges) {
+                e.preventDefault();
+            }
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
         
         return () => {
             window.removeEventListener('resize', resizeCanvas);
             window.removeEventListener('beforeprint', handlePrint);
             window.removeEventListener('afterprint', handleAfterPrint);
+            window.removeEventListener('beforeunload', handleBeforeUnload);
         };
     }, 
     [

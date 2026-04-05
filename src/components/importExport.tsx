@@ -17,6 +17,7 @@ export function ImportExportButtons({ store }: Props) {
         a.download = store.description.replace(/[^a-zA-Z0-9]/g, "-") + (store.isKata ? "-kata" : "-kumite") + ".json";
         a.click();
         URL.revokeObjectURL(url);
+        store.hasChanges = false;  // remove if we implement open/save
     };
 
     const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,6 +30,7 @@ export function ImportExportButtons({ store }: Props) {
                 const loaded = BracketStore.deserialize(reader.result as string);
                 Object.assign(store, loaded);
                 store.regenerateBracketStore();
+                store.hasChanges = false; // remove if we implement open/save
             } catch (err) {
                 console.error("Failed to load bracket file:", err);
                 alert("Invalid or incompatible bracket file.");
