@@ -14,7 +14,7 @@ export function ImportExportButtons({ store }: Props) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = store.description.replace(/[\<\>\:\"\/\\\|\?\*\x00-\x1F]/g, "_") + (store.isKata ? "-kata" : "-kumite") + "..bracket";
+        a.download = store.title.replace(/[\<\>\:\"\/\\\|\?\*\x00-\x1F]/g, "_") + (store.isKata ? "-kata" : "-kumite") + "..bracket";
         a.click();
         URL.revokeObjectURL(url);
         store.hasChanges = false;  // remove if we implement open/save

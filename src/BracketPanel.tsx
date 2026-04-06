@@ -64,8 +64,8 @@ const BracketPanel = observer(() => {
             context.font = bpstore.participants.length > 32 ? '10pt Arial' : '12pt Arial';
             context.fillStyle = 'black';
 
-            // Add description at the top
-            context.fillText(bpstore.description + " - " + (bpstore.isKata ? "Kata" : "Kumite"), 20, 20);
+            // Add Title at the top
+            context.fillText(bpstore.title + " - " + (bpstore.isKata ? "Kata" : "Kumite"), 20, 20);
 
             // Draw the bracket and record bounding boxes for interaction
             const newBoundingBoxes: BoundingBox[] = [];
@@ -208,7 +208,7 @@ const BracketPanel = observer(() => {
         bpstore.hasThirddPlaceMatch, 
         bpstore.isKata,
         bpstore.isSeededMatch,
-        bpstore.description,
+        bpstore.title,
     ]);
 
     const deleteParticipant = () => {

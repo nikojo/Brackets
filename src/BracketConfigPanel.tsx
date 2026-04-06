@@ -2,7 +2,7 @@ import InputParticipants from './components/InputParticipants.tsx';
 import KataKumite from './components/katakumite.tsx';
 import { ImportExportButtons } from './components/importExport.tsx';
 import Seeded from './components/seeded.tsx';
-import Description from './components/description.tsx';
+import Title from './components/title.tsx';
 import bpstore from './lib/BracketStore.ts';
 import Shuffle from './components/shuffle.tsx';
 import Help from './components/help.tsx';
@@ -12,8 +12,8 @@ export default function BracketConfigPanel() {
     return (
         <div className="bracket-config-panel">
             <fieldset>
-                <legend>Bracket Description</legend>
-                <Description />
+                <legend>Bracket Title</legend>
+                <Title />
             </fieldset>
             <fieldset>
                 <legend>Participants</legend>

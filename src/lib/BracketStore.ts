@@ -12,7 +12,7 @@ class BracketStore {
     isSeededMatch: boolean = false;
     isKata: boolean = true;
     isTop4: boolean = true; // only show top 4 in points mode, else top 8
-    description: string = "default";
+    title: string = "default";
     thirdPlaceTop : string | null = null;
     thirdPlaceBottom : string | null = null;
     thirdPlace : string | null = null;  // winner of the third place match, if applicable
@@ -46,8 +46,8 @@ class BracketStore {
         this.regenerateBracketStore();
     }
 
-    setDescription(description: string) {
-        this.description = description;
+    setTitle(title: string) {
+        this.title = title;
         this.regenerateBracketStore();
     }
 
@@ -151,7 +151,7 @@ class BracketStore {
             isSeededMatch: this.isSeededMatch,
             isKata: this.isKata,
             isTop4: this.isTop4,
-            description: this.description,
+            title: this.title,
             thirdPlaceTop: this.thirdPlaceTop,
             thirdPlaceBottom: this.thirdPlaceBottom,
             thirdPlace: this.thirdPlace,
@@ -170,7 +170,7 @@ class BracketStore {
             store.isSeededMatch = data.isSeededMatch;
             store.isKata = data.isKata;
             store.isTop4 = data.isTop4;
-            store.description = data.description;
+            store.title = data.title;
             store.thirdPlaceTop = data.thirdPlaceTop ?? null;
             store.thirdPlaceBottom = data.thirdPlaceBottom ?? null;
             store.thirdPlace = data.thirdPlace ?? null;
