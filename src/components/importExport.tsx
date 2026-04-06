@@ -14,7 +14,7 @@ export function ImportExportButtons({ store }: Props) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = store.description.replace(/[^a-zA-Z0-9]/g, "-") + (store.isKata ? "-kata" : "-kumite") + ".json";
+        a.download = store.description.replace(/[\<\>\:\"\/\\\|\?\*\x00-\x1F]/g, "_") + (store.isKata ? "-kata" : "-kumite") + "..bracket";
         a.click();
         URL.revokeObjectURL(url);
         store.hasChanges = false;  // remove if we implement open/save
@@ -42,13 +42,23 @@ export function ImportExportButtons({ store }: Props) {
         e.target.value = "";
     };
 
+    const startImport = () => {
+        if (store.hasChanges) {
+            if (!window.confirm("You have unsaved changes. Are you sure you want to import a new bracket?")) { 
+                return;
+            }
+        }
+        fileInputRef.current?.click();
+    };
+
+
     return (
         <div>
-            <button onClick={() => fileInputRef.current?.click()}>Import</button>
+            <button onClick={startImport}>Import</button>
             <input
                 ref={fileInputRef}
                 type="file"
-                accept=".json"
+                accept=".bracket"
                 style={{ display: "none" }}
                 onChange={handleImport}
             />
