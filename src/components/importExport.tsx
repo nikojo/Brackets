@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { BracketStore } from "../lib/BracketStore";
+import { runInAction } from "mobx";
 
 interface Props {
     store: BracketStore;
@@ -28,7 +29,9 @@ export function ImportExportButtons({ store }: Props) {
         reader.onload = () => {
             try {
                 const loaded = BracketStore.deserialize(reader.result as string);
-                Object.assign(store, loaded);
+                runInAction(() => {
+                    Object.assign(store, loaded);
+                });
                 store.regenerateBracketStore();
                 store.hasChanges = false; // remove if we implement open/save
             } catch (err) {

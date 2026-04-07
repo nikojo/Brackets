@@ -34,6 +34,7 @@ const BracketPanel = observer(() => {
 
             // Set canvas resolution to match display size
             const dpr = 1; //window.devicePixelRatio || 1;
+            console.log("DPR: " + window.devicePixelRatio);
             const rect = canvas.getBoundingClientRect();
 
             if (isPrinting) {
@@ -155,19 +156,35 @@ const BracketPanel = observer(() => {
             }
         };
 
+        /*
         // redraw before printing
         const handlePrint = () => {
             isPrinting = true;
             resizeCanvas();
         }
         window.addEventListener('beforeprint', handlePrint);
+        */
 
+        /*
         const handleAfterPrint = () => {
-            isPrinting = false;
-            resizeCanvas();
+            setTimeout(() => {
+                isPrinting = false;
+                resizeCanvas();
+            }, 100);
         }
         window.addEventListener('afterprint', handleAfterPrint);
+        */
 
+        const handlePrintChange = (mql: MediaQueryListEvent) => {
+            if (mql.matches) {
+                isPrinting = true; 
+                resizeCanvas();
+            } else {
+                isPrinting = false;
+                resizeCanvas();
+            }
+        };
+        window.matchMedia('print').addEventListener('change', handlePrintChange);
 
         // Initial render
         resizeCanvas();
@@ -196,8 +213,9 @@ const BracketPanel = observer(() => {
         window.addEventListener('beforeunload', handleBeforeUnload);
         
         return () => {
-            window.removeEventListener('beforeprint', handlePrint);
-            window.removeEventListener('afterprint', handleAfterPrint);
+            //window.removeEventListener('beforeprint', handlePrint);
+            //window.removeEventListener('afterprint', handleAfterPrint);
+            window.matchMedia('print').removeEventListener('change', handlePrintChange);
             window.removeEventListener('beforeunload', handleBeforeUnload);
         };
     }, 
