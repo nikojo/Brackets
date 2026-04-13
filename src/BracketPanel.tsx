@@ -7,6 +7,8 @@ const BracketPanel = observer(() => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [menuPos, setMenuPos] = useState<{x: number, y: number} | null>(null);
     const [selectedParticipant, setSelectedParticipant] = useState<string | null>(null);
+    const [lastWidth, setLastWidth] = useState<number>(0);
+    const [lastHeight, setLastHeight] = useState<number>(0);
 
  
     // bounding boxes
@@ -34,7 +36,6 @@ const BracketPanel = observer(() => {
 
             // Set canvas resolution to match display size
             const dpr = 1; //window.devicePixelRatio || 1;
-            console.log("DPR: " + window.devicePixelRatio);
             const rect = canvas.getBoundingClientRect();
 
             if (isPrinting) {
@@ -46,6 +47,8 @@ const BracketPanel = observer(() => {
                 canvas.width = rect.width * dpr;
                 canvas.height = rect.height * dpr;
             }
+            setLastWidth(canvas.width);
+            setLastHeight(canvas.height);
 
             //canvas.style.width = `${rect.width}px`;
             //canvas.style.height = `${rect.height}px`;
@@ -156,25 +159,6 @@ const BracketPanel = observer(() => {
             }
         };
 
-        /*
-        // redraw before printing
-        const handlePrint = () => {
-            isPrinting = true;
-            resizeCanvas();
-        }
-        window.addEventListener('beforeprint', handlePrint);
-        */
-
-        /*
-        const handleAfterPrint = () => {
-            setTimeout(() => {
-                isPrinting = false;
-                resizeCanvas();
-            }, 100);
-        }
-        window.addEventListener('afterprint', handleAfterPrint);
-        */
-
         const handlePrintChange = (mql: MediaQueryListEvent) => {
             if (mql.matches) {
                 isPrinting = true; 
@@ -194,6 +178,13 @@ const BracketPanel = observer(() => {
         const resizeObserver = new ResizeObserver((entries) => {
             for (const entry of entries) {
                 const { width, height } = entry.contentRect;
+
+                // Ignore CSS changes and only repaint on a size change
+                if (width === lastWidth && height === lastHeight) {
+                    continue; // Skip if size hasn't actually changed
+                }
+                setLastWidth(width);
+                setLastHeight(height);
 
                 // Update internal canvas resolution to match display size
                 canvas.width = width;
@@ -217,6 +208,7 @@ const BracketPanel = observer(() => {
             //window.removeEventListener('afterprint', handleAfterPrint);
             window.matchMedia('print').removeEventListener('change', handlePrintChange);
             window.removeEventListener('beforeunload', handleBeforeUnload);
+            resizeObserver.disconnect();
         };
     }, 
     [
