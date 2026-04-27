@@ -6,6 +6,7 @@ import Title from './components/title.tsx';
 import bpstore from './lib/BracketStore.ts';
 import Shuffle from './components/shuffle.tsx';
 import Help from './components/help.tsx';
+import { GoogleDrive } from './components/googledrive.tsx';
 
 export default function BracketConfigPanel() {
 
@@ -31,6 +32,7 @@ export default function BracketConfigPanel() {
             <fieldset>
                 <legend>Import/Export</legend>
                 <ImportExportButtons store={bpstore} />
+                <GoogleDrive/>
             </fieldset>
             <fieldset>
                 <legend>Help</legend>
