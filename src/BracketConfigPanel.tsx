@@ -30,9 +30,15 @@ export default function BracketConfigPanel() {
                 <Shuffle />
             </fieldset>
             <fieldset>
-                <legend>Import/Export</legend>
-                <ImportExportButtons store={bpstore} />
-                <GoogleDrive/>
+                <legend>File</legend>
+                <fieldset>
+                    <legend>Google Drive</legend>
+                    <GoogleDrive/>
+                </fieldset>
+                <fieldset>
+                    <legend>Local files</legend>
+                    <ImportExportButtons store={bpstore} />
+                </fieldset>
             </fieldset>
             <fieldset>
                 <legend>Help</legend>

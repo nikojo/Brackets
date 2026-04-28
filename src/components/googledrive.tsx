@@ -1,30 +1,25 @@
 import { useState } from "react";
+import { useStore, BracketStore } from "../lib/BracketStore";
+import { runInAction } from "mobx";
 
 export function GoogleDrive() {
+    const bpstore = useStore();
 
     const CLIENT_ID = '832249201910-27713mvcf27q4tbel51bnugrvkcfdquk.apps.googleusercontent.com';
 
     const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY as string;
     const DISCOVERY_DOC = "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest";
     const SCOPES = "https://www.googleapis.com/auth/drive.file"
-    //const SCOPES = "https://www.googleapis.com/auth/drive.readonly"
-
-    interface DriveFile {
-        id: string;
-        name: string;
-        mimeType: string;
-        url: string;
-    }
 
     type AuthState = "idle" | "loading" | "authenticated" | "error";
-    type PickerState = "idle" | "opening" | "picked" | "error";
 
     const [authState, setAuthState] = useState<AuthState>("idle");
-    //const [error, setError] = useState<string | null>(null);        
-    const [pickerState, setPickerState] = useState<PickerState>("idle");
-    const [selectedFile, setSelectedFile] = useState<DriveFile | null>(null);
+    //@ts-ignore
+    const [openPicker, setOpenPicker] = useState<google.picker.Picker>(null);
+    //@ts-ignore
+    const [saveAsPicker, setSaveAsPicker] = useState<google.picker.Picker>(null);
     
-    const authenticate = () => {
+    const authenticate = (cb: () => any) => {
         const loadScript = (src: string): Promise<void> =>
             new Promise((resolve, reject) => {
                 if (document.querySelector(`script[src="${src}"]`)) {
@@ -66,7 +61,8 @@ export function GoogleDrive() {
                             setAuthState("error");
                         } else {
                             setAuthState("authenticated");
-                            showPicker();
+                            cb();
+                            //showPicker();
                         }
                     },
                 });
@@ -85,94 +81,222 @@ export function GoogleDrive() {
             });
         };
 
-    const showPicker = () => {
+    const showOpenPicker = () => {
         const token = window.gapi.client.getToken();
         if (!token) return;
         try {
-            const picker = new window.google.picker.PickerBuilder()
-                .addView(
+            if (openPicker == null) {
+                const pickerBuilder = new window.google.picker.PickerBuilder();
+                pickerBuilder.addView(
+                    new window.google.picker.DocsView()
+                        .setIncludeFolders(true)
+                        .setSelectFolderEnabled(false)
+                        .setParent("root")
+                        .setMode(window.google.picker.DocsViewMode.LIST)
+                )
+                    .addView(
+                        new window.google.picker.DocsView()
+                            .setIncludeFolders(true)
+                            .setSelectFolderEnabled(false)
+                            .setOwnedByMe(false)
+                            .setLabel("Shared with me")
+                            .setMode(window.google.picker.DocsViewMode.LIST)
+                    )
+                    .setOAuthToken(token.access_token)
+                    .setDeveloperKey(API_KEY)
+                    .setSelectableMimeTypes("application/json")
+                    //@ts-ignore
+                    .setCallback(async (data: google.picker.ResponseObject) => {
+                        if (data.action === window.google.picker.Action.PICKED) {
+                            const doc = data.docs[0];
+                            try {
+                                const response = await window.gapi.client.drive.files.get(
+                                    { fileId: doc.id, alt: 'media' },
+                                    { responseType: 'json' }
+                                );
+                                const loaded = BracketStore.deserialize(response.body);
+                                runInAction(() => {
+                                    Object.assign(bpstore, loaded);
+                                });
+                                bpstore.regenerateBracketStore();
+                                bpstore.hasChanges = false; // remove if we implement open/save
+                            } catch (err) {
+                                alert("Failed to open file: " + doc.name + " Error: " + (err as Error).message);
+                                return;
+                            }
+                        } else if (data.action === window.google.picker.Action.CANCEL) {
+                            //ignore
+                        }
+                    })
+                const p = pickerBuilder.build();
+                setOpenPicker(p);
+                p.setVisible(true);
+            }
+            else {
+
+                openPicker.setVisible(true);
+            }
+
+        } catch (err) {
+            alert("Unexpected error: " + (err as Error).message);
+        }
+    }
+
+    const onOpen = () => {
+        if (bpstore.hasChanges) {
+            if (!window.confirm("You have unsaved changes. Are you sure you want to open a new bracket?")) { 
+                return;
+            }
+        }        
+        if (authState !== "authenticated") {
+            authenticate(showOpenPicker);
+        } else {
+            showOpenPicker();
+        }
+    }
+
+    const checkForExisting = async (filename: string, folderID: string) => {
+        let pageToken: string | undefined = undefined;
+        let foundID: string | null = null;
+        try {
+            do {
+                //@ts-ignore
+                const response = await window.gapi.client.drive.files.list({
+                    'q': "'" + folderID + "' in parents and trashed = false",
+                    'fields': 'nextPageToken, files(id, name)',
+                    'pageToken': pageToken
+                })
+                const files = response.result.files;
+                if (files && files.length > 0) {
+                    
+                    //@ts-ignore
+                    files.forEach((file) => {
+                        if (file.name === filename) foundID = file.id;
+                    })
+                }
+                pageToken = response.result.nextPageToken;
+            } while (pageToken);
+        } catch (err) {
+            console.log("Failed to list files: " + err.body);
+        }
+        return foundID;
+    }
+
+
+    const showSaveAsPicker = async () => {
+        const token = window.gapi.client.getToken();
+        if (!token) return;
+
+        try {
+            if (saveAsPicker) {
+                saveAsPicker.setVisible(true);
+            }
+            else {
+                const pickerBuilder = new window.google.picker.PickerBuilder();
+                pickerBuilder.addView(
                     new window.google.picker.DocsView()
                         .setIncludeFolders(true)
                         .setSelectFolderEnabled(true)
                         .setParent("root")
                         .setMode(window.google.picker.DocsViewMode.LIST)
                 )
-                .addView(
-                    new window.google.picker.DocsView()
-                        .setIncludeFolders(true)
-                        .setSelectFolderEnabled(true)
-                        .setOwnedByMe(false)
-                        .setLabel("Shared with me")
-                        .setMode(window.google.picker.DocsViewMode.LIST)
-                )
-                .setOAuthToken(token.access_token)
-                .setDeveloperKey(API_KEY)
-                //@ts-ignore
-                .setCallback(async (data: google.picker.ResponseObject) => {
-                    if (data.action === window.google.picker.Action.PICKED) {
-                        const doc = data.docs[0];
-                        setSelectedFile({
-                            id: doc.id,
-                            name: doc.name,
-                            mimeType: doc.mimeType,
-                            url: doc.url,
-                        });
-                        /* */
-                        try {
-                            const response = await window.gapi.client.drive.files.get(
-                                { fileId: doc.id, alt: 'media' },
-                                { responseType: 'json' }
-                            );
-                            console.log(response);
-                            console.log(response.result);
-                            console.log(response.body);
-                        } catch (err) {
-                            alert("Failed to open file: " + doc.name + " Error: " + err.body);
-                            return;
-                        }
-                            /* */
-                           /* 
-                        try {
-                            const url = "https://drive.google.com/uc?export=download&id=" + doc.id;
-                            console.log("Token: " + token.access_token);
-                            var response = await fetch(url, {
-                                headers: {
-                                    'Content-Type': 'application/json',
+                    .addView(
+                        new window.google.picker.DocsView()
+                            .setIncludeFolders(true)
+                            .setSelectFolderEnabled(true)
+                            .setOwnedByMe(false)
+                            .setLabel("Shared with me")
+                            .setMode(window.google.picker.DocsViewMode.LIST)
+                    )
+                    .setOAuthToken(token.access_token)
+                    .setDeveloperKey(API_KEY)
+                    //@ts-ignore
+                    .setCallback(async (data: google.picker.ResponseObject) => {
+                        if (data.action === window.google.picker.Action.PICKED) {
+                            const doc = data.docs[0];
+                            try {
+                                let folderID: string | null = null;
+                                if (doc.mimeType === "application/vnd.google-apps.folder") {
+                                    folderID = doc.id;
+                                } else {
+                                    // got a file, so need to traverse up to the parent folder
+                                    const resp = await window.gapi.client.drive.files.get(
+                                        { fileId: doc.id, fields: "parents" }
+                                    );
+                                    folderID = resp.result.parents[0];
                                 }
-                            });
-                            console.log(response.json);
-                        } catch (err) {
-                            alert("Failed to open file: " + doc.name + " Error: " + err.body);
+                                if (folderID != null) {
+                                    const filename = bpstore.title.replace(/[\<\>\:\"\/\\\|\?\*\x00-\x1F]/g, "_") + (bpstore.isKata ? "-kata" : "-kumite") + ".bracket";
+                                    try {
+                                        const existingFileID = await checkForExisting(filename, folderID);
+                                        if (existingFileID) {
+                                            // update existing file
+                                            const response = await fetch('https://www.googleapis.com/upload/drive/v3/files/' + existingFileID, {
+                                                method: 'PATCH',
+                                                headers: {
+                                                    'Authorization': 'Bearer ' + window.gapi.auth.getToken().access_token,
+                                                    'Content-Type': "application/json"
+                                                },
+                                                body: bpstore.serialize(),
+                                            });
+                                            if (!response.ok) {
+                                                alert("Save failed for: " + filename);
+                                                return;
+                                            }
+                                            await response.json();
+                                            bpstore.hasChanges = false;
+                                        } else {
+                                            const fileMetadata = {
+                                                'name': filename,
+                                                'parents': [folderID] // Place the file inside the specific folder
+                                            };
+                                            const form = new FormData();
+                                            form.append('metadata', new Blob([JSON.stringify(fileMetadata)], { type: 'application/json' }));
+                                            form.append('file', new Blob([bpstore.serialize()], { type: 'application/json' }));
+                                            fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
+                                                method: 'POST',
+                                                headers: new Headers({ 'Authorization': 'Bearer ' + window.gapi.auth.getToken().access_token }),
+                                                body: form
+                                            })
+                                                .then((res) => res.json())
+                                                .then((res) => console.log(res));
+                                            bpstore.hasChanges = false;
+                                        }
+                                    } catch (err) {
+                                        alert("Failed to save file.")
+                                    }
+                                }
+                            } catch (err) {
+                                alert("Failed to open file: " + doc.name + " Error: " + (err as Error).message);
+                                return;
+                            }
+                        } else if (data.action === window.google.picker.Action.CANCEL) {
+                            //ignore
                         }
-                          /*  */
-                        setPickerState("picked");
-                    } else if (data.action === window.google.picker.Action.CANCEL) {
-                        setPickerState("idle");
-                    }
-                })
-                .build();
+                    })
+                const p = pickerBuilder.build();
+                setSaveAsPicker(p);
+                p.setVisible(true);
+            }
 
-            picker.setVisible(true);
         } catch (err) {
             alert("Unexpected error: " + (err as Error).message);
-            setPickerState("error");
         }
     }
 
-    const onOpen = () => {
+    const onSave = () => {
         if (authState !== "authenticated") {
-            authenticate();
+            authenticate(showSaveAsPicker);
         } else {
-            showPicker();
+            showSaveAsPicker();
         }
-
     }
 
 
     return (
         <div>
             <button onClick={ onOpen }>Open</button>
-            
+            <button onClick={ onSave }>Save</button>
         </div>
     );
 }
