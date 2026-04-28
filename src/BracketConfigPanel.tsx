@@ -36,7 +36,7 @@ export default function BracketConfigPanel() {
                     <GoogleDrive/>
                 </fieldset>
                 <fieldset>
-                    <legend>Local files</legend>
+                    <legend>On Your Device</legend>
                     <ImportExportButtons store={bpstore} />
                 </fieldset>
             </fieldset>
