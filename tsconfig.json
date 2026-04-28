@@ -1,7 +1,10 @@
 {
   "files": [],
+  "compilerOptions": {
+    "types": ["google.accounts", "google.picker", "google.picker.ResponseObject"]
+  },
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
-  ]
+  ]    
 }
