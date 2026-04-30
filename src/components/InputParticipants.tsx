@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { useStore } from '../lib/BracketStore.ts';
+import { useStore, BracketStore } from '../lib/BracketStore.ts';
 import useFocus from '../hooks/useFocus.ts';
 import { FileUploadModal, type ParsedData } from '../FileUploadModal.tsx';
+import { runInAction } from "mobx";
+
 
 export default function InputParticipants() {
 
@@ -48,20 +50,41 @@ export default function InputParticipants() {
         }
     }
 
+    const handleClearBracket = () => {
+        if (bpstore.hasChanges) {
+            if (!window.confirm("You have unsaved changes. Are you sure you want to clear out this bracket?")) { 
+                return;
+            }
+        }
+        const newStore = new BracketStore();
+        runInAction(() => {
+            Object.assign(bpstore, newStore);
+        });
+        bpstore.regenerateBracketStore();
+        bpstore.hasChanges = false;
+    }
+
     return (
         <div className="input-participants">
-            <input type="text" 
-            value={inputParticipantName} 
-            onChange={(e) => setInputParticipantName(e.target.value)}
-            onKeyDown={handleKeyDown}
-            ref={inputRef}
-             />
-            <button onClick={handleAddParticipant}>
-                Add
-            </button>
-            <br />
-            <br />
-            <FileUploadModal onDataParsed={handleAddParticipants} />
+            <fieldset>
+                <legend>Add a participant</legend>
+                <input type="text" 
+                value={inputParticipantName} 
+                onChange={(e) => setInputParticipantName(e.target.value)}
+                onKeyDown={handleKeyDown}
+                ref={inputRef}
+                />
+                <button onClick={handleAddParticipant}>
+                    Add
+                </button>
+            </fieldset>
+            <fieldset>
+                <legend>Bulk operations</legend>
+                <FileUploadModal onDataParsed={handleAddParticipants} />
+                <button onClick={handleClearBracket}>
+                    Clear Bracket
+                </button>
+            </fieldset>
         </div>
     )
 
