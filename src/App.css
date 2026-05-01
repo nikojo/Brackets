@@ -19,12 +19,12 @@ html, body {
 
 .left-sidebar {
   height: 100%;
-  background-color: #f0f0f0;
+  /* background-color: #f0f0f0; */
 }
 
 .bracket-config-panel {
   width: 250px;
-  background-color: #f0f0f0;
+  /* background-color: #f0f0f0; */
   padding: 5px;
 }
 
