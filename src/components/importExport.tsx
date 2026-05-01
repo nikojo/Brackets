@@ -1,24 +1,22 @@
 import { useRef } from "react";
-import { BracketStore } from "../lib/BracketStore";
+import { useStore, BracketStore } from "../lib/BracketStore";
 import { runInAction } from "mobx";
 
-interface Props {
-    store: BracketStore;
-}
 
-export function ImportExportButtons({ store }: Props) {
+export function ImportExportButtons() {
+    const bpstore = useStore();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleExport = () => {
-        const json = store.serialize();
+        const json = bpstore.serialize();
         const blob = new Blob([json], { type: "application/json" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = store.title.replace(/[\<\>\:\"\/\\\|\?\*\x00-\x1F]/g, "_") + (store.isKata ? "-kata" : "-kumite") + ".bracket";
+        a.download = bpstore.generateFileName();
         a.click();
         URL.revokeObjectURL(url);
-        store.hasChanges = false; // even Import/Export will reset the flag since we don't want to force people to use Google Drive
+        bpstore.hasChanges = false; // even Import/Export will reset the flag since we don't want to force people to use Google Drive
     };
 
     const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,10 +28,10 @@ export function ImportExportButtons({ store }: Props) {
             try {
                 const loaded = BracketStore.deserialize(reader.result as string);
                 runInAction(() => {
-                    Object.assign(store, loaded);
+                    Object.assign(bpstore, loaded);
                 });
-                store.regenerateBracketStore();
-                store.hasChanges = false;  // even Import/Export will reset the flag since we don't want to force people to use Google Drive
+                bpstore.regenerateBracketStore();
+                bpstore.hasChanges = false;  // even Import/Export will reset the flag since we don't want to force people to use Google Drive
             } catch (err) {
                 console.error("Failed to load bracket file:", err);
                 alert("Invalid or incompatible bracket file.");
@@ -46,7 +44,7 @@ export function ImportExportButtons({ store }: Props) {
     };
 
     const startImport = () => {
-        if (store.hasChanges) {
+        if (bpstore.hasChanges) {
             if (!window.confirm("You have unsaved changes. Are you sure you want to import a new bracket?")) { 
                 return;
             }

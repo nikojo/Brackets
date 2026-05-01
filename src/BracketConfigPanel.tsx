@@ -3,7 +3,6 @@ import KataKumite from './components/katakumite.tsx';
 import { ImportExportButtons } from './components/importExport.tsx';
 import Seeded from './components/seeded.tsx';
 import Title from './components/title.tsx';
-import bpstore from './lib/BracketStore.ts';
 import Shuffle from './components/shuffle.tsx';
 import Help from './components/help.tsx';
 import { GoogleDrive } from './components/googledrive.tsx';
@@ -37,7 +36,7 @@ export default function BracketConfigPanel() {
                 </fieldset>
                 <fieldset>
                     <legend>On Your Device</legend>
-                    <ImportExportButtons store={bpstore} />
+                    <ImportExportButtons/>
                 </fieldset>
             </fieldset>
             <fieldset>

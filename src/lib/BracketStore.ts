@@ -142,6 +142,10 @@ class BracketStore {
         this.hasChanges = true;
     }
 
+    generateFileName() : string {
+        return this.title.replace(/[\<\>\:\"\/\\\|\?\*\x00-\x1F]/g, "_") + (this.isKata ? "-kata" : "-kumite") + ".bracket";
+    }
+
     serialize(): string {
         const data = {
             version: this.#version,

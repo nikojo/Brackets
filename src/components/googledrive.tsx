@@ -14,10 +14,8 @@ export function GoogleDrive() {
     const DISCOVERY_DOC = "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest";
     const SCOPES = "https://www.googleapis.com/auth/drive.file"
 
-    type AuthState = "idle" | "loading" | "authenticated" | "error";
     type PickerState = "open" | "save";
 
-    const [authState, setAuthState] = useState<AuthState>("idle");
     //@ts-ignore
     const [picker, setPicker] = useState<google.picker.Picker>(null);
     const pickerState = useRef<PickerState>("open");
@@ -61,26 +59,20 @@ export function GoogleDrive() {
                     callback: (resp) => {
                         if (resp.error) {
                             alert("Unexpected error: " + resp.error);
-                            setAuthState("error");
                         } else {
-                            setAuthState("authenticated");
                             cb();
-                            //showPicker();
                         }
                     },
                 });
-                setAuthState("loading");
                 // If a token already exists, skip consent screen
                 if (!gapi.client.getToken()) {
                     tc.requestAccessToken({ prompt: "consent" });
                 } else {
                     tc.requestAccessToken({ prompt: "" });
                 }
-                setAuthState("idle");
             })
             .catch((err: Error) => {
                 alert("Unexpected error: " + err.message);
-                setAuthState("error");
             });
         };
 
@@ -114,7 +106,6 @@ export function GoogleDrive() {
                 })
                 const files = response.result.files;
                 if (files && files.length > 0) {
-                    
                     //@ts-ignore
                     files.forEach((file) => {
                         if (file.name === filename) foundID = file.id;
@@ -134,7 +125,7 @@ export function GoogleDrive() {
             return;
         }
         if (folderID) {
-            const filename = bpstore.title.replace(/[\<\>\:\"\/\\\|\?\*\x00-\x1F]/g, "_") + (bpstore.isKata ? "-kata" : "-kumite") + ".bracket";
+            const filename = bpstore.generateFileName();
             try {
                 const existingFileID = await checkForExisting(filename, folderID);
                 if (existingFileID) {
@@ -242,7 +233,7 @@ export function GoogleDrive() {
                 return;
             }
         }        
-        if (authState !== "authenticated") {
+        if (!picker) {
             authenticate(showPicker);
         } else {
             showPicker();
@@ -252,7 +243,7 @@ export function GoogleDrive() {
 
     const onSave = () => {
         pickerState.current = "save";
-        if (authState !== "authenticated") {
+        if (!picker) {
             authenticate(showPicker);
         } else {
             showPicker();
