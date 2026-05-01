@@ -7,15 +7,35 @@ export function ImportExportButtons() {
     const bpstore = useStore();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleExport = () => {
+    const handleExport = async () => {
         const json = bpstore.serialize();
-        const blob = new Blob([json], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = bpstore.generateFileName();
-        a.click();
-        URL.revokeObjectURL(url);
+        if ('showSaveFilePicker' in window) {
+            // show save as dialog
+            try {
+                // @ts-ignore - already checked to make sure method exists above
+                const handle = await window.showSaveFilePicker({
+                    suggestedName: bpstore.generateFileName(),
+                    types: [{
+                        description: 'Bracket Files',
+                        accept: { 'text/plain': ['.bracket'] },
+                    }],
+                });
+                const writable = await handle.createWritable();
+                await writable.write(json);
+                await writable.close();
+            } catch (err) {
+                alert('Export failed: ' + err)
+            }
+        } else {
+            // just download
+            const blob = new Blob([json], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = bpstore.generateFileName();
+            a.click();
+            URL.revokeObjectURL(url);
+        }
         bpstore.hasChanges = false; // even Import/Export will reset the flag since we don't want to force people to use Google Drive
     };
 
