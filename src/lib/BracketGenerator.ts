@@ -5,6 +5,10 @@ type Position = {
     row: number; // bottom to top, 0-indexed
 }
 
+/*
+The methods that we use here to generate the initial bracket is pretty brute force.
+I'm sure there are some more elegant ways to do this.
+*/
 class InitialBracketStructure {
     numParticipants: number;
     numberOfPairsInFirstRound: number; // number of pairs that will be in the first round

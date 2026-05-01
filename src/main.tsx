@@ -12,13 +12,3 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     </ParticipantStore.Provider>
   </React.StrictMode>,
 )
-
-
-/*
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <ParticipantStore.Provider value={bpstore}>
-    <App />
-  </ParticipantStore.Provider>
-);
-*/

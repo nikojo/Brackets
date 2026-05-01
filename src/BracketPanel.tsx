@@ -204,8 +204,6 @@ const BracketPanel = observer(() => {
         window.addEventListener('beforeunload', handleBeforeUnload);
         
         return () => {
-            //window.removeEventListener('beforeprint', handlePrint);
-            //window.removeEventListener('afterprint', handleAfterPrint);
             window.matchMedia('print').removeEventListener('change', handlePrintChange);
             window.removeEventListener('beforeunload', handleBeforeUnload);
             resizeObserver.disconnect();
