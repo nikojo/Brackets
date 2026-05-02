@@ -65,8 +65,11 @@ const BracketPanel = observer(() => {
             context.strokeRect(5, 5, canvas.width-10, canvas.height-10);
             */
 
+            const computedStyle = getComputedStyle(document.documentElement);
+            const drawColor = computedStyle.getPropertyValue("color").trim();
+
             context.font = bpstore.participants.length > 32 ? '10pt Arial' : '12pt Arial';
-            context.fillStyle = 'black';
+            context.fillStyle = drawColor;
 
             // Add Title at the top
             context.fillText(bpstore.title + " - " + (bpstore.isKata ? "Kata" : "Kumite"), 20, 20);
@@ -86,7 +89,7 @@ const BracketPanel = observer(() => {
                     // draw lines
                     if (participant !== null) {
                         const topLine = round !== 0 && pos % 2 === 1;
-                        context.strokeStyle = topLine ? "red" : "black";
+                        context.strokeStyle = topLine ? "red" : drawColor;
                         context.lineWidth = 2;
                         context.beginPath();
                         context.moveTo(x, y);
@@ -124,9 +127,9 @@ const BracketPanel = observer(() => {
                 context.lineTo(x + 150, y + 20);
                 context.stroke();
                 context.fillText(bpstore.thirdPlaceTop || "", x, y - 4);
-                // black participant
+                // White participant
                 y = titlebarHeight + 60;
-                context.strokeStyle = "black";
+                context.strokeStyle = drawColor;
                 context.lineWidth = 2;
                 context.beginPath();
                 context.moveTo(x, y);
@@ -137,7 +140,7 @@ const BracketPanel = observer(() => {
                 // Third place
                 x += 150;
                 y = titlebarHeight + 40;
-                context.strokeStyle = "black";
+                context.strokeStyle = drawColor;
                 context.lineWidth = 2;
                 context.beginPath();
                 context.moveTo(x, y);
@@ -151,6 +154,7 @@ const BracketPanel = observer(() => {
                 const x = (bpstore.rounds() + 1) * 150 + leftMargin;
                 const kataScoringNum = bpstore.isTop4 ? 4 : 8;
                 const spacing = (canvas.height - titlebarHeight) / (kataScoringNum * 2);
+                context.strokeStyle = drawColor;
                 for (let i = 0; i < Math.min(bpstore.participants.length, kataScoringNum); i++) {
                     const y = titlebarHeight + Math.floor(((kataScoringNum - (i + 1)) * 2 * spacing) + spacing);
                     context.fillText("kata: ______________", x, y - (spacing / 4));

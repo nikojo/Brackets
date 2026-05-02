@@ -12,7 +12,7 @@ const Seeded = observer(() => {
     return (
         <div>
             <input type="checkbox" id="seeded" checked={bpstore.isSeededMatch} onChange={toggleIsSeededMatch}/>
-            <label htmlFor="seeded">Seeded Match?</label>            
+            <label htmlFor="seeded">Seeded</label>            
         </div>
     )
 });
