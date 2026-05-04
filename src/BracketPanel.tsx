@@ -38,8 +38,10 @@ const BracketPanel = observer(() => {
             const dpr = 1; //window.devicePixelRatio || 1;
             const rect = canvas.getBoundingClientRect();
 
+            const lineLength = 150;
+
             if (isPrinting) {
-                const width = Math.max(bpstore.rounds() * 150 + (bpstore.isKata ? 350 : 200), 900);
+                const width = Math.max(bpstore.rounds() * lineLength + (bpstore.isKata ? 350 : 200), 900);
                 const height = Math.floor(width * 11 / 8.5);
                 canvas.width = width * dpr;
                 canvas.height = height * dpr;
@@ -79,7 +81,7 @@ const BracketPanel = observer(() => {
             const titlebarHeight = 50
             const leftMargin = 20;
             for (let round = bpstore.brackets.length - 1; round >= 0; round--) {
-                const x = (bpstore.rounds() - round) * 150 + leftMargin;
+                const x = (bpstore.rounds() - round) * lineLength + leftMargin;
                 const rows = bpstore.brackets[round].length;
                 const spacing = (canvas.height - titlebarHeight) / (rows * 2);
                 for (let pos = 0; pos < rows; pos++) {
@@ -93,9 +95,9 @@ const BracketPanel = observer(() => {
                         context.lineWidth = 2;
                         context.beginPath();
                         context.moveTo(x, y);
-                        context.lineTo(x + 150, y);
+                        context.lineTo(x + lineLength, y);
                         if (round !== 0) {
-                            context.lineTo(x + 150, y + (topLine ? spacing : -spacing));
+                            context.lineTo(x + lineLength, y + (topLine ? spacing : -spacing));
                         }
                         context.stroke();
                     }
@@ -116,15 +118,15 @@ const BracketPanel = observer(() => {
 
             // Draw third place bracket if applicable
             if (!bpstore.isKata && bpstore.participants.length > 3 && bpstore.hasThirddPlaceMatch) {
-                let x = (bpstore.rounds() - 1) * 150 + leftMargin;
+                let x = (bpstore.rounds() - 1) * lineLength + leftMargin;
                 let y = titlebarHeight + 20;
                 // red participant
                 context.strokeStyle = "red";
                 context.lineWidth = 2;
                 context.beginPath();
                 context.moveTo(x, y);
-                context.lineTo(x + 150, y);
-                context.lineTo(x + 150, y + 20);
+                context.lineTo(x + lineLength, y);
+                context.lineTo(x + lineLength, y + 20);
                 context.stroke();
                 context.fillText(bpstore.thirdPlaceTop || "", x, y - 4);
                 // White participant
@@ -133,25 +135,25 @@ const BracketPanel = observer(() => {
                 context.lineWidth = 2;
                 context.beginPath();
                 context.moveTo(x, y);
-                context.lineTo(x + 150, y);
-                context.lineTo(x + 150, y - 20);
+                context.lineTo(x + lineLength, y);
+                context.lineTo(x + lineLength, y - 20);
                 context.stroke();
                 context.fillText(bpstore.thirdPlaceBottom || "", x, y - 4);
                 // Third place
-                x += 150;
+                x += lineLength;
                 y = titlebarHeight + 40;
                 context.strokeStyle = drawColor;
                 context.lineWidth = 2;
                 context.beginPath();
                 context.moveTo(x, y);
-                context.lineTo(x + 150, y);
+                context.lineTo(x + lineLength, y);
                 context.stroke();
                 context.fillText(bpstore.thirdPlace || "", x, y - 4);
             }
 
             // draw kata and scores if applicable
             if (bpstore.isKata) {
-                const x = (bpstore.rounds() + 1) * 150 + leftMargin;
+                const x = (bpstore.rounds() + 1) * lineLength + leftMargin;
                 const kataScoringNum = bpstore.isTop4 ? 4 : 8;
                 const spacing = (canvas.height - titlebarHeight) / (kataScoringNum * 2);
                 context.strokeStyle = drawColor;
@@ -159,6 +161,42 @@ const BracketPanel = observer(() => {
                     const y = titlebarHeight + Math.floor(((kataScoringNum - (i + 1)) * 2 * spacing) + spacing);
                     context.fillText("kata: ______________", x, y - (spacing / 4));
                     context.fillText("score: _____________", x, y + (spacing / 4));
+                }
+            }
+
+            const drawResultLine = (text: string, x: number, offset: number, y: number) => {
+                context.fillText(text, x, y);
+                context.beginPath();
+                context.moveTo(x + offset, y);
+                context.lineTo(x + offset + lineLength, y);
+                context.stroke();
+            }
+
+
+            // draw 1st to 3rd place lines
+            {
+                const x = Math.max(canvas.width - 200, 600);
+                const ygap = 50;
+                context.strokeStyle = drawColor;
+                context.lineWidth = 2;
+                const metrics = context.measureText("2nd: ");
+                const textWidth = Math.round(metrics.width);
+                let y = Math.max(canvas.height - 200, 700);
+                if (bpstore.participants.length > 0) {
+                    drawResultLine("1st:", x, textWidth, y);
+                }
+                y += ygap;
+                if (bpstore.participants.length > 1) {
+                    drawResultLine("2nd:", x, textWidth, y);
+                }
+                y += ygap;
+                if (bpstore.participants.length > 2) {
+                    drawResultLine("3rd:", x, textWidth, y);
+                }
+                if (!bpstore.isKata && !bpstore.hasThirddPlaceMatch && bpstore.participants.length > 3) {
+                    // kumite without a third place match
+                    y += ygap;
+                    drawResultLine("3rd:", x, textWidth, y);
                 }
             }
         };

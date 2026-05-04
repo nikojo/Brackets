@@ -55,21 +55,18 @@ class InitialBracketStructure {
     buildSeedPositions() {
         //create a list where the index is the participant index and the value is the position in the first round (0-indexed from the bottom).
 
-        // First create a list where the participant index is the position in the first round
         const positions: number[] = [];
         const size = this.bracketStore.brackets[this.bracketStore.rounds()].length;
         if (size === 0) return;
 
-        for (let i = 1; i < size / 4; i++) {
-            const even = i % 2 === 0;
-            positions.splice(0, 0, i * 2 + (even ? 1: 2));
-            positions.push(i * 2 + (even ? 2: 1));
-        }
-        positions.splice(0, 0, 1);
-        positions.push(2);
-
-        for (let i = positions.length - 1; i >= 0; i--) {
-            positions.splice(i, 0, size + 1 - positions[i]);
+        positions[0] = 1;
+        let power = 1;
+        while (positions.length < size) {
+            const total = Math.pow(2, power++) + 1; // the sum of the positions of the pairing totals this
+            for (let j = positions.length+1; j < total; j++) {
+                const partner = positions.indexOf(total - j);
+                positions.splice(partner, 0, j);
+            }
         }
 
         // special case for kata
@@ -78,20 +75,20 @@ class InitialBracketStructure {
             const tmp: number[] = [];
             if (this.bracketStore.isTop4) {
                 const quarter = size / 4;
-                tmp.push(...positions.slice(0, quarter));
                 tmp.push(...positions.slice(quarter * 3));
-                tmp.push(...positions.slice(quarter * 2, quarter * 3));
                 tmp.push(...positions.slice(quarter * 1, quarter * 2));
+                tmp.push(...positions.slice(0, quarter));
+                tmp.push(...positions.slice(quarter * 2, quarter * 3));
             } else {
                 const eighth = size / 8;
-                tmp.push(...positions.slice(0, eighth));
                 tmp.push(...positions.slice(eighth * 7));
-                tmp.push(...positions.slice(eighth * 4, eighth * 5));
                 tmp.push(...positions.slice(eighth * 3, eighth * 4));
-                tmp.push(...positions.slice(eighth * 2, eighth * 3));
-                tmp.push(...positions.slice(eighth * 5, eighth * 6));
-                tmp.push(...positions.slice(eighth * 6, eighth * 7));
                 tmp.push(...positions.slice(eighth * 1, eighth * 2));
+                tmp.push(...positions.slice(eighth * 5, eighth * 6));
+                tmp.push(...positions.slice(eighth * 4, eighth * 5));
+                tmp.push(...positions.slice(0, eighth));
+                tmp.push(...positions.slice(eighth * 2, eighth * 3));
+                tmp.push(...positions.slice(eighth * 6, eighth * 7));
             }
             Object.assign(positions, tmp);
         }
