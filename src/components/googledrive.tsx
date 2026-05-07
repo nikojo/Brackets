@@ -10,7 +10,6 @@ export function GoogleDrive() {
 
     const CLIENT_ID = '832249201910-27713mvcf27q4tbel51bnugrvkcfdquk.apps.googleusercontent.com';
 
-    const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY as string;
     const DISCOVERY_DOC = "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest";
     const SCOPES = "https://www.googleapis.com/auth/drive.file"
 
@@ -47,7 +46,6 @@ export function GoogleDrive() {
             )
             .then(() =>
                 gapi.client.init({
-                    apiKey: API_KEY,
                     discoveryDocs: [DISCOVERY_DOC],
                 })
             )
@@ -81,11 +79,15 @@ export function GoogleDrive() {
             alert("Please select a valid .bracket file.");
             return;
         }
-        const response = await gapi.client.drive.files.get(
-            { fileId: docID, alt: 'media' },
-            { responseType: 'json' }
-        );
-        const loaded = BracketStore.deserialize(response.body);
+        const response = await fetch('https://www.googleapis.com/drive/v3/files/' + docID + '?alt=media', {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': 'Bearer ' + gapi.auth.getToken().access_token,
+                            'Accept': "application/json"
+                        }
+                    });
+        const data = await response.text();
+        const loaded = BracketStore.deserialize(data);
         runInAction(() => {
             Object.assign(bpstore, loaded);
         });
@@ -93,25 +95,42 @@ export function GoogleDrive() {
         bpstore.hasChanges = false; // remove if we implement open/save
     }
 
+    interface DriveFile {
+        id: string;
+        name: string;
+        mimeType: string;
+    }
+
+    interface DriveListResponse {
+        files: DriveFile[];
+        nextPageToken?: string;
+    }
+
     const checkForExisting = async (filename: string, folderID: string) => {
         let pageToken: string | undefined = undefined;
         let foundID: string | null = null;
         try {
             do {
-                //@ts-ignore
-                const response = await gapi.client.drive.files.list({
-                    'q': "'" + folderID + "' in parents and trashed = false",
-                    'fields': 'nextPageToken, files(id, name)',
-                    'pageToken': pageToken
-                })
-                const files = response.result.files;
+                const params = new URLSearchParams({
+                    fields: 'nextPageToken, files(id, name)',
+                    q: "'" + folderID + "' in parents and trashed = false",
+                    pageToken: pageToken ? pageToken : "",
+                });
+                const response = await fetch('https://www.googleapis.com/drive/v3/files/' + 
+                    '?' + params.toString(), {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': 'Bearer ' + gapi.auth.getToken().access_token,
+                            'Accept': 'application/json',
+                        }});
+                const data: DriveListResponse = await response.json();
+                const files = data.files;
                 if (files && files.length > 0) {
-                    //@ts-ignore
                     files.forEach((file) => {
                         if (file.name === filename) foundID = file.id;
                     })
                 }
-                pageToken = response.result.nextPageToken;
+                pageToken = data.nextPageToken;
             } while (pageToken);
         } catch (err) {
             console.log("Failed to list files: " + err);
@@ -191,7 +210,6 @@ export function GoogleDrive() {
                             .setMode(google.picker.DocsViewMode.LIST)
                     )
                     .setOAuthToken(token.access_token)
-                    .setDeveloperKey(API_KEY)
                     .setTitle("Open to a file, Save to a folder")
                     //.setSelectableMimeTypes("application/json")
                     //@ts-ignore
